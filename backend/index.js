@@ -2,11 +2,13 @@ import express from "express";
 const app = express();
 const port = 5001;
 import ethers, { utils } from "ethers";
-import ABI from "./abi/Test.json";
 import axios from "axios";
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
+import { createRequire } from "module"; // Bring in the ability to create the 'require' method
+const require = createRequire(import.meta.url); // construct the require method
+const ABI = require("./abi/Test.json"); // use the require method
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -78,9 +80,6 @@ const filter = {
 provider.once("block", () => {
   try {
     contract.on(filter, (num, ...event) => {
-      axios.post("http://localhost:3000/api/hello", JSON.stringify(event), {
-        headers: { "Content-Type": "application/json" },
-      });
       console.log("num", num);
       console.log("event", event);
       return () => {

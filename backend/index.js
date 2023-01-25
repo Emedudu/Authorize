@@ -2,7 +2,7 @@ import express from "express";
 const app = express();
 const port = 5001;
 import ethers, { utils } from "ethers";
-import ABI from "./abi/Test.json" assert { type: "json" };
+import ABI from "./abi/Test.json";
 import axios from "axios";
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";

@@ -1,0 +1,35 @@
+{
+  "name": "frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@lighthouse-web3/sdk": "^0.1.11",
+    "@next/font": "13.1.2",
+    "@web3modal/ethereum": "2.0.0-rc.2",
+    "@web3modal/react": "2.0.0-rc.2",
+    "eslint": "8.32.0",
+    "eslint-config-next": "13.1.2",
+    "ethers": "5.5.1",
+    "firebase": "^9.16.0",
+    "flowbite": "^1.6.2",
+    "flowbite-react": "^0.3.7",
+    "next": "13.1.2",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-firebase-hooks": "^5.1.1",
+    "react-hook-form": "^7.42.1",
+    "react-icons": "^4.7.1",
+    "wagmi": "0.8.10"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.13",
+    "postcss": "^8.4.21",
+    "tailwindcss": "^3.2.4"
+  }
+}

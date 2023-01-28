@@ -1841,16 +1841,16 @@
     "@tanstack/query-persist-client-core" "4.22.4"
 
 "@tanstack/react-query-persist-client@^4.14.5":
-  version "4.22.4"
-  resolved "https://registry.yarnpkg.com/@tanstack/react-query-persist-client/-/react-query-persist-client-4.22.4.tgz#8e4fad6f70ca922ef9e7be58c5bd14b010cff780"
-  integrity sha512-vnRD28T0BLsbDRlantC6W34eLCbjSoZEkYL4t2QYRyuEcmUya2Ddbn+DN+RfZHqxoMiSJNfMdmRXsMPpNHZ1QA==
+  version "4.23.0"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-query-persist-client/-/react-query-persist-client-4.23.0.tgz#9efd696279987f654c104b985eed7a5fab665d89"
+  integrity sha512-wYK0HQP2vS/tAf//oQwoiCmbjMBr+JcaLNex+BU+fbN3ul2uUi6v8Ek5yS9tT95MOc3zySwEDwY48fesbV7KgA==
   dependencies:
     "@tanstack/query-persist-client-core" "4.22.4"
 
 "@tanstack/react-query@^4.14.5":
-  version "4.22.4"
-  resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-4.22.4.tgz#851581c645f1c9cfcd394448fedd980a39bbc3fe"
-  integrity sha512-e5j5Z88XUQGeEPMyz5XF1V0mMf6Da+6URXiTpZfUb9nuHs2nlNoA+EoIvnhccE5b9YT6Yg7kARhn2L7u94M/4A==
+  version "4.23.0"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-4.23.0.tgz#0b9e14269a48cf5a4ffe46c8525cdb9df2ebd9cf"
+  integrity sha512-cfQsrecZQjYYueiow4WcK8ItokXJnv+b2OrK8Lf5kF7lM9uCo1ilyygFB8wo4MfxchUBVM6Cs8wq4Ed7fouwkA==
   dependencies:
     "@tanstack/query-core" "4.22.4"
     use-sync-external-store "^1.2.0"
@@ -2008,10 +2008,10 @@
     "@typescript-eslint/types" "5.48.2"
     eslint-visitor-keys "^3.3.0"
 
-"@wagmi/core@0.7.9":
-  version "0.7.9"
-  resolved "https://registry.yarnpkg.com/@wagmi/core/-/core-0.7.9.tgz#6ba054d8496e81b16b1c36a6faa6942233f4ecfb"
-  integrity sha512-97KCELUP5Q1AagRyE7SmpLh4/v3xdcy/XMbybLvvtQbgmi3y5oEzy4h/wJMY1hEZlmicqyWZAHHm6xIr1tP5HA==
+"@wagmi/core@0.7.4":
+  version "0.7.4"
+  resolved "https://registry.yarnpkg.com/@wagmi/core/-/core-0.7.4.tgz#cc5201e7dc405a88886b5eddc74ac4e3e2f1c15f"
+  integrity sha512-HhN5p0C9dlU1pWNF54hBEXLn12n5ueUJAxl0eg4YtcTTw/VIg/GSINm0eYkVznFPf4qus9ODA9BGTQ7k79d2gQ==
   dependencies:
     abitype "^0.1.8"
     eventemitter3 "^4.0.7"
@@ -4575,6 +4575,11 @@ globrex@^0.1.2:
   resolved "https://registry.yarnpkg.com/globrex/-/globrex-0.1.2.tgz#dd5d9ec826232730cd6793a5e33a9302985e6098"
   integrity sha512-uHJgbwAMwNFf5mLst7IWLNg14x1CkeqglJb/K3doi4dw6q2IvAAmM/Y81kevy83wP+Sst+nutFTYOGg3d1lsxg==
 
+goober@^2.1.10:
+  version "2.1.11"
+  resolved "https://registry.yarnpkg.com/goober/-/goober-2.1.11.tgz#bbd71f90d2df725397340f808dbe7acc3118e610"
+  integrity sha512-5SS2lmxbhqH0u9ABEWq7WPU69a4i2pYcHeCxqaNq6Cw3mnrF0ghWNM4tEGid4dKy8XNIAUbuThuozDHHKJVh3A==
+
 gopd@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/gopd/-/gopd-1.0.1.tgz#29ff76de69dac7489b7c0918a5788e56477c332c"
@@ -6301,6 +6306,13 @@ react-hook-form@^7.42.1:
   resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.42.1.tgz#c6396ca684716d89abc1c7e64343badfd30c56c6"
   integrity sha512-2UIGqwMZksd5HS55crTT1ATLTr0rAI4jS7yVuqTaoRVDhY2Qc4IyjskCmpnmdYqUNOYFy04vW253tb2JRVh+IQ==
 
+react-hot-toast@2.4.0:
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/react-hot-toast/-/react-hot-toast-2.4.0.tgz#b91e7a4c1b6e3068fc599d3d83b4fb48668ae51d"
+  integrity sha512-qnnVbXropKuwUpriVVosgo8QrB+IaPJCpL8oBI6Ov84uvHZ5QQcTp2qg6ku2wNfgJl6rlQXJIQU5q+5lmPOutA==
+  dependencies:
+    goober "^2.1.10"
+
 react-icons@^4.6.0, react-icons@^4.7.1:
   version "4.7.1"
   resolved "https://registry.yarnpkg.com/react-icons/-/react-icons-4.7.1.tgz#0f4b25a5694e6972677cb189d2a72eabea7a8345"
@@ -7159,16 +7171,16 @@ vary@~1.1.2:
   resolved "https://registry.yarnpkg.com/vary/-/vary-1.1.2.tgz#2299f02c6ded30d4a5961b0b9f74524a18f634fc"
   integrity sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==
 
-wagmi@0.8.10:
-  version "0.8.10"
-  resolved "https://registry.yarnpkg.com/wagmi/-/wagmi-0.8.10.tgz#941bebd3cf3f0366e54753040d2f2a141096ce6e"
-  integrity sha512-svS/Debs6maJX3TlPDXNo+UDfZn8VCHzN2xcMMjPjcu2Z9k2iwFwC0TMLxM1itluzrTcw9n8F8E+f6gb+Aw+EQ==
+wagmi@0.8.5:
+  version "0.8.5"
+  resolved "https://registry.yarnpkg.com/wagmi/-/wagmi-0.8.5.tgz#f15de70b8b7bca11bf9faccae2dd3eea980ce1df"
+  integrity sha512-LKxolobNPwTPsidtbgoA4x5zWUFeRAzaGqNE7AiSsM8wHRuClO6Mrp3XtGzVy/UfaMFE/yR1xWIJbiHXzeeEmA==
   dependencies:
     "@coinbase/wallet-sdk" "^3.5.3"
     "@tanstack/query-sync-storage-persister" "^4.14.5"
     "@tanstack/react-query" "^4.14.5"
     "@tanstack/react-query-persist-client" "^4.14.5"
-    "@wagmi/core" "0.7.9"
+    "@wagmi/core" "0.7.4"
     "@walletconnect/ethereum-provider" "^1.8.0"
     abitype "^0.1.7"
     use-sync-external-store "^1.2.0"

@@ -38,3 +38,7 @@ export const deployMetadataToIpfs = async (obj) => {
   console.log("File Status:", output);
   return output.data;
 };
+
+export const shortenAddress = (address) => {
+  return `${address.slice(0, 8)}...${address.slice(36)}`;
+};

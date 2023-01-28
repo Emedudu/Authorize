@@ -1,15 +1,17 @@
 import Link from "next/link";
-import React from "react";
+import React, { useContext } from "react";
 import { VscSignOut } from "react-icons/vsc";
 import { Web3Button, Web3NetworkSwitch } from "@web3modal/react";
 import { auth } from "@/lib/firebase";
+import { UserContext } from "@/lib/context";
+import { useAccount } from "wagmi";
+import { shortenAddress } from "@/lib/helpers";
 
 function Navbar(props) {
-  const signOut = async () => {
-    await auth.signOut();
-    router.push("/");
-    return;
-  };
+  const signOut = async () => {};
+
+  const { username, userETH, userAvatar } = useContext(UserContext);
+
   return (
     <nav className="flex px-8 py-8 text-lg font-semibold text-gray-600 shadow-sm justify-between items-center">
       <Link
@@ -46,14 +48,42 @@ function Navbar(props) {
       </div>
 
       <div className="flex items-center space-x-10">
-        <div>Profile</div>
-        <button
-          type="button"
-          class="flex items-center focus:outline-none hover:text-white text-red-700 bg-transparent border-2 border-red-700 hover:bg-red-700 focus:ring-4 focus:ring-red-300 rounded-xl px-3 py-1.5"
-          onClick={signOut}
-        >
-          Exit <VscSignOut className="ml-2" />
-        </button>
+        <Web3Button />
+
+        {username ? (
+          <div className="relative flex items-center md:order-2 group">
+            <button className=" flex mr-3 text-sm bg-gray-800 rounded-full md:mr-0 focus:ring-4 focus:ring-gray-300 ">
+              <img
+                className="w-8 h-8 rounded-full"
+                src={`https://avatars.dicebear.com/api/avataaars/${userAvatar}.svg`}
+                alt="user photo"
+              />
+            </button>
+
+            <div className="z-10 hidden group-hover:flex flex-col absolute right-0 top-4 my-4 text-base bg-white divide-y divide-gray-100 rounded-lg shadow">
+              <div className="flex justify-center p-2">
+                <img
+                  className="w-24 h-24 rounded-full"
+                  src={`https://avatars.dicebear.com/api/avataaars/${userAvatar}.svg`}
+                  alt="user photo"
+                />
+              </div>
+              <div className="px-4 py-2 overflow-x-hidden capitalize">
+                {username}
+              </div>
+              <div className="px-4 py-2 overflow-x-hidden">
+                {shortenAddress(userETH)}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <Link
+            className="flex items-center focus:outline-none hover:text-white text-red-700 bg-transparent border-2 border-red-700 hover:bg-red-700 focus:ring-4 focus:ring-red-300 rounded-xl px-3 py-1.5"
+            href={"/signIn"}
+          >
+            Sign In
+          </Link>
+        )}
       </div>
     </nav>
   );

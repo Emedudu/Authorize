@@ -1,6 +1,7 @@
 import React from "react";
 
-function TextArea({ register }) {
+function TextArea({ register, ...props }) {
+  console.log(props);
   return (
     <>
       <div class="w-full mb-4 border border-gray-200 rounded-lg bg-gray-200 dark:bg-gray-700 dark:border-gray-600">
@@ -221,6 +222,7 @@ function TextArea({ register }) {
             class="block w-full px-0 text-sm text-gray-800 bg-gray-100 border-0 dark:bg-gray-800 focus:ring-0 dark:text-white dark:placeholder-gray-400"
             placeholder="Write an article..."
             required
+            defaultValue={props?.defaultValue || ""}
             {...register("description")}
           ></textarea>
         </div>

@@ -1,6 +1,5 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import {
   collection,
   getDocs,
@@ -8,31 +7,51 @@ import {
   where,
   getFirestore,
   getDoc,
+  limit,
+  doc,
 } from "firebase/firestore";
-import { voidBookData } from "./constants";
+import { voidBookData, voidUserData } from "./constants";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyDthMUrG0YiXnKQGiBatht-5c4Oygx-xNw",
-  authDomain: "authorize-155ed.firebaseapp.com",
-  projectId: "authorize-155ed",
-  storageBucket: "authorize-155ed.appspot.com",
-  messagingSenderId: "661335197535",
-  appId: "1:661335197535:web:00b904fdedb985685fd8ea",
-  measurementId: "G-1ET5PHVPZY",
+  apiKey: "AIzaSyBrlMIiUwdKEAHcmwPypU_0l6xL_pkNTEU",
+  authDomain: "authorize-44073.firebaseapp.com",
+  projectId: "authorize-44073",
+  storageBucket: "authorize-44073.appspot.com",
+  messagingSenderId: "793520914911",
+  appId: "1:793520914911:web:6d09e2f0d5f6b4609ec46a",
+  measurementId: "G-JZHX2EFS42",
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-export const auth = getAuth(app);
-export const googleProvider = new GoogleAuthProvider();
-const db = getFirestore(app);
+export const db = getFirestore(app);
 
 // view functions
+export const getUserData = async (username) => {
+  if (username) {
+    try {
+      const docRef = query(
+        collection(db, "users"),
+        where("username", "==", username.toLowerCase()),
+        limit(1)
+      );
+      const docSnap = await getDocs(docRef);
+      let res = [];
+      docSnap.forEach((doc) => {
+        res.push(doc.data());
+      });
+      return res[0];
+    } catch (error) {
+      return voidUserData;
+    }
+  }
+};
+
 export const getBookData = async (id) => {
   try {
     const docRef = doc(db, "books", id);

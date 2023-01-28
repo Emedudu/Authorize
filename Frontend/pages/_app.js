@@ -1,7 +1,8 @@
 import Footer from "@/components/Footer";
 import Loader from "@/components/Loader";
 import Navbar from "@/components/Navbar";
-import { LoaderContext } from "@/lib/context";
+import { LoaderContext, UserContext } from "@/lib/context";
+import { useUserData } from "@/lib/hooks";
 import "@/styles/globals.css";
 import {
   EthereumClient,
@@ -11,7 +12,8 @@ import {
 import { Web3Modal } from "@web3modal/react";
 import { Router } from "next/router";
 import { useEffect, useState } from "react";
-import { configureChains, createClient, WagmiConfig } from "wagmi";
+import { configureChains, createClient, useAccount, WagmiConfig } from "wagmi";
+import { jsonRpcProvider } from "wagmi/providers/jsonRpc";
 
 const hyperspace = {
   id: 3141,
@@ -30,28 +32,18 @@ const hyperspace = {
   },
   testnet: true,
 };
-const wallaby = {
-  id: 31415,
-  name: "Filecoin — Wallaby testnet",
-  network: "wallaby",
-  nativeCurrency: {
-    decimals: 18,
-    name: "Testnet Filecoin",
-    symbol: "tFil",
-  },
-  rpcUrls: {
-    default: { http: ["https://wallaby.node.glif.io/rpc/v0"] },
-  },
-  blockExplorers: {
-    default: { name: "Glif", url: "https://explorer.glif.io/wallaby" },
-  },
-  testnet: true,
-};
+
 const { chains, provider } = configureChains(
-  [hyperspace, wallaby],
+  [hyperspace],
   [
     walletConnectProvider({
       projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_ID,
+    }),
+    jsonRpcProvider({
+      rpc: (chain) => {
+        if (chain.id !== hyperspace.id) return null;
+        return chain.rpcUrls.default;
+      },
     }),
   ]
 );
@@ -74,7 +66,7 @@ export default function App({ Component, pageProps }) {
     };
   }, [Router.events]);
 
-  // const userData = useUserData("me");
+  const userData = useUserData("me");
   const [loading, setLoading] = useState(false);
 
   return (
@@ -84,19 +76,21 @@ export default function App({ Component, pageProps }) {
       } font-mono bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-[#eacda3] via-[#f4e2d8] to-[#d6ae7b] overflow-hidden`}
     >
       <WagmiConfig client={wagmiClient}>
-        <LoaderContext.Provider value={{ loading, setLoading }}>
-          {loading ? (
-            <Loader />
-          ) : (
-            <>
-              <Navbar />
-              <div className="min-h-[calc(100vh-108px)]">
-                <Component {...pageProps} />
-              </div>
-              <Footer />
-            </>
-          )}
-        </LoaderContext.Provider>
+        <UserContext.Provider value={userData}>
+          <LoaderContext.Provider value={{ loading, setLoading }}>
+            {loading ? (
+              <Loader />
+            ) : (
+              <>
+                <Navbar />
+                <div className="min-h-[calc(100vh-108px)]">
+                  <Component {...pageProps} />
+                </div>
+                <Footer />
+              </>
+            )}
+          </LoaderContext.Provider>
+        </UserContext.Provider>
       </WagmiConfig>
       <Web3Modal
         projectId={process.env.NEXT_PUBLIC_WALLET_CONNECT_ID}

@@ -1,17 +1,31 @@
 import Head from "next/head";
-import { useContractWrite, usePrepareContractWrite } from "wagmi";
-import abi from "@/abi/Test.json";
+import {
+  useContractRead,
+  useContractWrite,
+  usePrepareContractWrite,
+} from "wagmi";
+import testABI from "@/abi/Test.json";
+import bookABI from "@/abi/Book.json";
 import { Web3Button, Web3NetworkSwitch } from "@web3modal/react";
+import { BigNumber, ethers } from "ethers";
 export default function Home() {
   const { config } = usePrepareContractWrite({
-    address: abi.address,
-    abi: abi.abi,
+    address: testABI.address,
+    abi: testABI.abi,
     chainId: 3141,
     functionName: "add",
     args: [],
   });
 
-  const { data, isLoading, error, isError, write } = useContractWrite(config);
+  const { write } = useContractWrite(config);
+
+  const { data, isError, isLoading } = useContractRead({
+    address: testABI.address,
+    abi: testABI.abi,
+    functionName: "integer",
+  });
+
+  console.log(data?.toString());
   return (
     <>
       <Head>
@@ -23,6 +37,7 @@ export default function Home() {
       <main>
         <Web3Button />
         <button onClick={write}>add</button>
+        {/* <p>{data}</p> */}
       </main>
     </>
   );

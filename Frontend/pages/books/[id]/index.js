@@ -4,12 +4,25 @@ import abi from "@/abi/Test.json";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { useBookData } from "@/lib/hooks";
+import Image from "next/image";
 // import { Web3Button, Web3NetworkSwitch } from "@web3modal/react";
 export default function Home() {
   const router = useRouter();
   const { id } = router.query;
 
-  const bookData = useBookData(id);
+  const bookData = {
+    image:
+      "https://images.unsplash.com/photo-1554629947-334ff61d85dc?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1024&h=1280&q=80",
+    name: "The perfect marriage",
+    description:
+      "blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah ",
+    author:
+      "blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah ",
+    price: 4.99,
+    rentPrice: 2,
+    id: 1,
+  };
+  // const bookData = useBookData(id);
   //   const { config } = usePrepareContractWrite({
   //     address: abi.address,
   //     abi: abi.abi,
@@ -27,7 +40,50 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main></main>
+      <main className="flex flex-col space-y-5 p-4">
+        <div className="p-2 text-2xl capitalize font-semibold text-center text-gray-700">
+          {bookData.name}
+        </div>
+        <div className="flex max-h-[calc(100vh-156px)] space-x-5">
+          <div className="flex items-center justify-center">
+            <div className="relative h-96 w-64">
+              <Image
+                src={bookData.image}
+                fill={true}
+                className="rounded-lg shadow-xl shadow-orange-500/50"
+              />
+            </div>
+          </div>
+          <div className="max-h-[calc(100vh-156px)] flex flex-col p-3 m-2">
+            <div className="flex justify-end space-x-3 p-2">
+              <button className="flex flex-col items-center border-2 border-lime-700 text-lime-700 hover:text-white hover:bg-lime-500 rounded-lg p-2 hover:scale-105 ">
+                <span className="font-semibold">Buy Access</span>
+                <span className="font-light text-sm">@ ${bookData.price}</span>
+              </button>
+
+              <button className="flex flex-col items-center border-2 border-yellow-500 text-yellow-500 hover:text-white hover:bg-yellow-500 rounded-lg p-2 hover:scale-105">
+                <span className="font-semibold">Rent Access</span>
+                <span className="font-light text-sm">
+                  @ ${bookData.rentPrice}
+                </span>
+              </button>
+              <button>Read Book</button>
+            </div>
+            <div className="overflow-y-scroll ">
+              <h5 className="text-lg capitalize font-semibold text-left text-gray-700">
+                About the book:
+              </h5>
+              <p>{bookData.description}</p>
+            </div>
+          </div>
+        </div>
+        <div>
+          <h5 className="text-lg capitalize font-semibold text-left text-gray-700">
+            About the author:
+          </h5>
+          <p>{bookData.author}</p>
+        </div>
+      </main>
     </>
   );
 }

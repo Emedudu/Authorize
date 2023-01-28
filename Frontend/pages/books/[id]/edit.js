@@ -8,7 +8,12 @@ import { FaHandPointRight } from "react-icons/fa";
 import { useForm } from "react-hook-form";
 import { deployMetadataToIpfs } from "@/lib/helpers";
 import { VscDebugContinueSmall } from "react-icons/vsc";
-import { useAccount, useContractWrite, usePrepareContractWrite } from "wagmi";
+import {
+  useAccount,
+  useContractWrite,
+  usePrepareContractWrite,
+  useWaitForTransaction,
+} from "wagmi";
 import bookABI from "@/abi/Book.json";
 import { Web3Button } from "@web3modal/react";
 import { LoaderContext } from "@/lib/context";
@@ -43,12 +48,19 @@ export default function Home() {
     chainId: 3141,
     functionName: "createBook",
     args: [1],
+  });
+
+  const { data, isLoading, error, isError, isSuccess, write } =
+    useContractWrite(config);
+
+  console.log("data", data);
+
+  useWaitForTransaction({
+    hash: data?.hash,
     onSettled(data, error) {
       console.log("Settled", { data, error });
     },
   });
-
-  const { data, isLoading, error, isError, write } = useContractWrite(config);
 
   const callDeployMetadata = async (val) => {
     setLoading(true);
@@ -60,10 +72,11 @@ export default function Home() {
         imageData: JSON.stringify(imageData),
         contentData: JSON.stringify(contentData),
       });
-      write();
-      console.log(res);
+      write?.();
+
+      // set access conditions on lighthouse for the contentData once the book has been created onChain and the bookId retrieved
     } catch (error) {
-      console.log("error");
+      console.log(error);
     }
     setLoading(false);
   };
@@ -139,8 +152,9 @@ export default function Home() {
             <button type="submit" ref={submitRef}></button>
           </form>
         </section>
-        <section
-          className="flex items-center justify-center h-full lg:w-1/4 bg-gradient-to-br from-[#fceabb] to-[#f8b500] hover:bg-gradient-to-bl cursor-pointer p-5"
+        <button
+          className="flex items-center justify-center h-full lg:w-1/4 bg-gradient-to-br from-[#fceabb] to-[#f8b500] hover:bg-gradient-to-bl p-5"
+          disabled={!write}
           onClick={() => isConnected && submitRef.current.click()}
         >
           {isConnected ? (
@@ -150,7 +164,7 @@ export default function Home() {
           ) : (
             <Web3Button />
           )}
-        </section>
+        </button>
       </main>
     </>
   );

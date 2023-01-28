@@ -7,3 +7,10 @@ export const voidBookData = {
   sellingPrice: 0,
   tag: "",
 };
+
+export const voidUserData = {
+  userETH: null,
+  userAvatar: null,
+  username: "",
+  userAbout: "",
+};

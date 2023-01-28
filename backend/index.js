@@ -1,6 +1,6 @@
 import express from "express";
 const app = express();
-const port = 5001;
+const port = process.env.PORT;
 import ethers, { utils } from "ethers";
 import axios from "axios";
 // Import the functions you need from the SDKs you need
@@ -91,6 +91,6 @@ provider.once("block", () => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
+app.listen(port || 5001, () => {
+  console.log(`Example app listening on port ${port || 5001}`);
 });

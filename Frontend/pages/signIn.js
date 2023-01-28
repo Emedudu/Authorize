@@ -1,24 +1,22 @@
-import TextArea from "@/components/TextArea";
 import { UserContext } from "@/lib/context";
 import { db } from "@/lib/firebase";
 import { Web3Button } from "@web3modal/react";
-import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import Head from "next/head";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useAccount } from "wagmi";
 
 export default function SignIn() {
   const router = useRouter();
-  const { id } = router.query;
   const { address, isConnected } = useAccount();
-  const { username, userETH, userAbout, userAvatar } = useContext(UserContext);
+  const { username } = useContext(UserContext);
 
-  const [randomPic, setRandomPic] = useState(userAvatar);
+  if (username) router.push("/users/me");
 
-  useEffect(() => setRandomPic(userAvatar), [userAvatar]);
+  const [randomPic, setRandomPic] = useState(parseInt(Math.random() * 1000000));
 
   const {
     handleSubmit,
@@ -27,28 +25,18 @@ export default function SignIn() {
     formState: { errors },
   } = useForm();
 
-  const updateProfile = async (values) => {
-    const { description } = values;
+  const signIn = async (values) => {
+    const { username } = values;
     console.log(values);
-    if (address) {
+    if (address && username) {
       try {
         const docRef = doc(db, "users", address);
-        const docSnap = await getDoc(docRef);
-        let firebaseRes;
-        if (docSnap.exists()) {
-          firebaseRes = await updateDoc(docRef, {
-            userAbout: description || userAbout,
-            userAvatar: randomPic,
-          });
-        } else {
-          firebaseRes = await setDoc(docRef, {
-            username,
-            userAbout: description || userAbout,
-            userETH: address,
-            userAvatar: randomPic,
-          });
-        }
-        router.push(`/users/${id}`);
+        await setDoc(docRef, {
+          username: username.toLowerCase(),
+          userAvatar: randomPic,
+          userETH: address,
+        });
+        router.push("/users/me");
       } catch (error) {
         console.log(error);
       }
@@ -64,20 +52,29 @@ export default function SignIn() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="flex items-center justify-center min-h-[calc(100vh-108px)]">
-        <div class="w-2/3 relative bg-white rounded-lg shadow dark:bg-gray-700">
+        <div class="w-1/3 relative bg-white rounded-lg shadow dark:bg-gray-700">
           <div class="relative px-6 py-6 lg:px-8">
             <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">
-              Edit your Profile
+              Sign in to our platform
             </h3>
-            <form className="space-y-6" onSubmit={handleSubmit(updateProfile)}>
+            <form className="space-y-6" onSubmit={handleSubmit(signIn)}>
+              <div className="flex flex-col space-y-3">
+                <p className="text-red-700 text-sm font-semibold">
+                  Wallet Address*
+                </p>
+                <div className="p-3 rounded-lg bg-gray-50 w-full border-2 border-gray-500 overflow-x-hidden">
+                  {address || "Connect Wallet Below 👇"}
+                </div>
+                <Web3Button />
+              </div>
+
               <div>
                 <p className="text-red-700 text-sm font-semibold">Username*</p>
 
                 <input
                   placeholder="Pick a unique username"
                   className="p-3 rounded-lg bg-gray-50 w-full border-2 border-gray-500"
-                  defaultValue={username}
-                  disabled
+                  {...register("username")}
                 />
               </div>
 
@@ -85,8 +82,8 @@ export default function SignIn() {
                 <p className="text-red-700 text-sm font-semibold">
                   {"Avatar (Click to change)*"}
                 </p>
-                <div
-                  className="relative h-32 w-32 cursor-pointer"
+                <button
+                  className="relative h-32 w-32"
                   onClick={() =>
                     setRandomPic(parseInt(Math.random() * 1000000))
                   }
@@ -96,17 +93,10 @@ export default function SignIn() {
                     fill={true}
                     className="rounded-full shadow-xl shadow-orange-500/50"
                   />
-                </div>
+                </button>
               </div>
-
-              <div className="py-2">
-                <p className="text-red-700 text-sm font-semibold">About you*</p>
-
-                <TextArea register={register} defaultValue={userAbout} />
-              </div>
-
               <button
-                className="absolute bottom-0 right-2 rounded-lg bg-orange-400 text-white p-2 hover:scale-105 font-semibold"
+                className="absolute bottom-2 right-2 rounded-lg bg-orange-400 text-white p-2 hover:scale-105 font-semibold"
                 type="submit"
               >
                 Continue

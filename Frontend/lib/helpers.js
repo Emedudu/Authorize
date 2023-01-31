@@ -1,4 +1,6 @@
 import lighthouse from "@lighthouse-web3/sdk";
+import axios from "axios";
+import { ethers } from "ethers";
 
 export const blobToBase64 = (blob) => {
   return new Promise((resolve, reject) => {
@@ -19,6 +21,19 @@ const progressCallback = (progressData) => {
   console.log(percentageDone);
 };
 
+const encryptionSignature = async () => {
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  const signer = provider.getSigner();
+  const address = await signer.getAddress();
+  const messageRequested = (await lighthouse.getAuthMessage(address)).data
+    .message;
+  const signedMessage = await signer.signMessage(messageRequested);
+  return {
+    signedMessage: signedMessage,
+    publicKey: address,
+  };
+};
+
 export const deployImageToIpfs = async (e) => {
   const output = await lighthouse.upload(
     e,
@@ -26,6 +41,19 @@ export const deployImageToIpfs = async (e) => {
     progressCallback
   );
   console.log("File Status:", output);
+  return output.data;
+};
+
+export const deployContentToIpfs = async (e) => {
+  const sig = await encryptionSignature();
+  const output = await lighthouse.uploadEncrypted(
+    e,
+    sig.publicKey,
+    process.env.NEXT_PUBLIC_LIGHTHOUSE_KEY,
+    sig.signedMessage,
+    progressCallback
+  );
+  console.log(output);
   return output.data;
 };
 
@@ -37,6 +65,51 @@ export const deployMetadataToIpfs = async (obj) => {
   );
   console.log("File Status:", output);
   return output.data;
+};
+
+export const getMetadataFromHash = async (hash) => {
+  const metadataRes = await axios.get(
+    `https://gateway.lighthouse.storage/ipfs/${hash}`
+  );
+  const { name, description, imageData, contentData } = metadataRes;
+  return {
+    name,
+    description,
+    imageHash: JSON.parse(imageData).Hash,
+    contentHash: JSON.parse(contentData).Hash,
+  };
+};
+
+export const applyAccessConditions = async (cid, contractAddress, bookId) => {
+  const conditions = [
+    {
+      id: 1,
+      chain: "hyperspace",
+      method: "canAccessBook",
+      standardContractType: "Custom",
+      contractAddress: contractAddress,
+      returnValueTest: {
+        comparator: "==",
+        value: "true",
+      },
+      parameters: [bookId, ":userAddress"],
+      inputArrayType: [uint, address],
+      outputType: "boolean",
+    },
+  ];
+
+  const aggregator = "([1])";
+  const { publicKey, signedMessage } = await encryptionSignature();
+
+  const response = await lighthouse.accessCondition(
+    publicKey,
+    cid,
+    signedMessage,
+    conditions,
+    aggregator
+  );
+
+  console.log(response);
 };
 
 export const shortenAddress = (address) => {

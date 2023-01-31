@@ -1,31 +1,81 @@
 import Head from "next/head";
 import {
+  useAccount,
   useContractRead,
   useContractWrite,
   usePrepareContractWrite,
 } from "wagmi";
-import testABI from "@/abi/Test.json";
-import bookABI from "@/abi/Book.json";
+// import testABI from "@/abi/Test.json";
+// import bookABI from "@/abi/Book.json";
+import keyABI from "@/abi/Key.json";
 import { Web3Button, Web3NetworkSwitch } from "@web3modal/react";
 import { BigNumber, ethers } from "ethers";
+
 export default function Home() {
-  const { config } = usePrepareContractWrite({
-    address: testABI.address,
-    abi: testABI.abi,
+  const { address } = useAccount();
+
+  // const { config } = usePrepareContractWrite({
+  //   address: testABI.address,
+  //   abi: testABI.abi,
+  //   chainId: 3141,
+  //   functionName: "add",
+  //   args: [],
+  // });
+
+  // const { write } = useContractWrite(config);
+
+  // const { data, isError, isLoading } = useContractRead({
+  //   address: testABI.address,
+  //   abi: testABI.abi,
+  //   functionName: "integer",
+  // });
+
+  const { config: configToMint } = usePrepareContractWrite({
+    address: keyABI.address,
+    abi: [
+      {
+        inputs: [
+          { internalType: "uint256", name: "keyId", type: "uint256" },
+          { internalType: "uint256", name: "bookId", type: "uint256" },
+        ],
+        name: "addBook",
+        outputs: [],
+        stateMutability: "nonpayable",
+        type: "function",
+      },
+    ],
     chainId: 3141,
-    functionName: "add",
-    args: [],
+    functionName: "addBook(uint256,uint256)",
+    args: [5, 4],
+    onSettled: (data, error) => {
+      console.log({ data, error });
+    },
   });
 
-  const { write } = useContractWrite(config);
+  const { data: mintData, write: mint } = useContractWrite(configToMint);
 
-  const { data, isError, isLoading } = useContractRead({
-    address: testABI.address,
-    abi: testABI.abi,
-    functionName: "integer",
-  });
+  // const { configToApprove } = usePrepareContractWrite({
+  //   address: keyABI.address,
+  //   abi: keyABI.abi,
+  //   chainId: 3141,
+  //   functionName: "approve",
+  //   args: [bookABI.address, 1],
+  //   onSettled: (data, error) => {
+  //     console.log({ data, error });
+  //   },
+  // });
 
-  console.log(data?.toString());
+  // const {
+  //   data: approveData,
+  //   isLoading: approveIsLoading,
+  //   error: approveError,
+  //   isError: approveIsError,
+  //   isSuccess: approveIsSuccess,
+  //   write: approve,
+  // } = useContractWrite(configToApprove);
+
+  // console.log(data?.toString());
+  // console.log(approveData?.toString());
   return (
     <>
       <Head>
@@ -36,7 +86,9 @@ export default function Home() {
       </Head>
       <main>
         <Web3Button />
-        <button onClick={write}>add</button>
+        {/* <button onClick={write}>add</button> */}
+        <button onClick={() => mint?.()}>mint</button>
+        {/* <button onClick={approve}>approve</button> */}
         {/* <p>{data}</p> */}
       </main>
     </>

@@ -13,6 +13,7 @@
     "@next/font": "13.1.2",
     "@web3modal/ethereum": "2.0.0-rc.2",
     "@web3modal/react": "2.0.0-rc.2",
+    "axios": "^1.2.6",
     "eslint": "8.32.0",
     "eslint-config-next": "13.1.2",
     "ethers": "5.5.1",
@@ -26,7 +27,7 @@
     "react-hook-form": "^7.42.1",
     "react-hot-toast": "2.4.0",
     "react-icons": "^4.7.1",
-    "wagmi": "0.8.5"
+    "wagmi": "0.8.10"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.13",

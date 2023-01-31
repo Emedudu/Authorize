@@ -1,27 +1,33 @@
 import express from "express";
 const app = express();
 const port = process.env.PORT;
-import ethers, { utils } from "ethers";
-import axios from "axios";
+import ethers, { BigNumber, utils } from "ethers";
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import {
+  deleteDoc,
+  doc,
+  getDoc,
+  getFirestore,
+  setDoc,
+} from "firebase/firestore";
 import { createRequire } from "module"; // Bring in the ability to create the 'require' method
 const require = createRequire(import.meta.url); // construct the require method
-const ABI = require("./abi/Test.json"); // use the require method
+const testABI = require("./abi/Test.json"); // use the require method
+const bookABI = require("./abi/Book.json");
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyDthMUrG0YiXnKQGiBatht-5c4Oygx-xNw",
-  authDomain: "authorize-155ed.firebaseapp.com",
-  projectId: "authorize-155ed",
-  storageBucket: "authorize-155ed.appspot.com",
-  messagingSenderId: "661335197535",
-  appId: "1:661335197535:web:00b904fdedb985685fd8ea",
-  measurementId: "G-1ET5PHVPZY",
+  apiKey: "AIzaSyBrlMIiUwdKEAHcmwPypU_0l6xL_pkNTEU",
+  authDomain: "authorize-44073.firebaseapp.com",
+  projectId: "authorize-44073",
+  storageBucket: "authorize-44073.appspot.com",
+  messagingSenderId: "793520914911",
+  appId: "1:793520914911:web:6d09e2f0d5f6b4609ec46a",
+  measurementId: "G-JZHX2EFS42",
 };
 
 // Initialize Firebase
@@ -45,45 +51,70 @@ const hyperspace = {
   },
   testnet: true,
 };
-const wallaby = {
-  id: 31415,
-  name: "Filecoin — Wallaby testnet",
-  network: "wallaby",
-  nativeCurrency: {
-    decimals: 18,
-    name: "Testnet Filecoin",
-    symbol: "tFil",
-  },
-  rpcUrls: {
-    default: { http: ["https://wallaby.node.glif.io/rpc/v0"] },
-  },
-  blockExplorers: {
-    default: { name: "Glif", url: "https://explorer.glif.io/wallaby" },
-  },
-  testnet: true,
-};
+
 const provider = new ethers.providers.JsonRpcProvider(
   "https://api.hyperspace.node.glif.io/rpc/v1",
   3141
 );
 
-const contract = new ethers.Contract(ABI.address, ABI.abi, provider);
+const testContract = new ethers.Contract(
+  testABI.address,
+  testABI.abi,
+  provider
+);
+const bookContract = new ethers.Contract(
+  bookABI.address,
+  bookABI.abi,
+  provider
+);
 
-const filter = {
-  address: ABI.address,
+const testFilterAdd = {
+  address: testABI.address,
   topics: [
     // the name of the event, parnetheses containing the data type of each event, no spaces
     utils.id("Added(address)"),
   ],
 };
 
+const bookFilterCreate = {
+  address: bookABI.address,
+  topics: [
+    // the name of the event, parnetheses containing the data type of each event, no spaces
+    utils.id("BookCreated(address,string,uint256)"),
+  ],
+};
+
 provider.once("block", () => {
   try {
-    contract.on(filter, (num, ...event) => {
+    testContract.on(testFilterAdd, (num, ...event) => {
       console.log("num", num);
       console.log("event", event);
       return () => {
-        contract.removeAllListeners();
+        testContract.removeAllListeners();
+      };
+    });
+  } catch (error) {
+    console.log("error");
+  }
+
+  try {
+    bookContract.on(bookFilterCreate, async (num, ...event) => {
+      // console.log("num", num);
+      // console.log("event", event);
+
+      const deleteDocRef = doc(db, "books", event[0]);
+      const docSnap = await getDoc(deleteDocRef);
+
+      let book;
+      if (docSnap.exists()) {
+        book = docSnap.data();
+        await deleteDoc(deleteDocRef);
+        const saveDocRef = doc(db, "books", event[1].toString());
+        await setDoc(saveDocRef, book);
+      }
+
+      return () => {
+        bookContract.removeAllListeners();
       };
     });
   } catch (error) {

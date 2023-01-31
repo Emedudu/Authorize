@@ -1,4 +1,4 @@
-import { deployImageToIpfs } from "@/lib/helpers";
+import { deployContentToIpfs, deployImageToIpfs } from "@/lib/helpers";
 import React from "react";
 
 function FileInput({ fileData, setFileData, id }) {
@@ -48,7 +48,9 @@ function FileInput({ fileData, setFileData, id }) {
             type="file"
             class="hidden"
             onChange={(e) =>
-              deployImageToIpfs(e).then((res) => setFileData(res))
+              id == "image"
+                ? deployImageToIpfs(e).then((res) => setFileData(res))
+                : deployContentToIpfs(e).then((res) => setFileData(res))
             }
           />
         </label>

@@ -17,7 +17,7 @@ contract Book is ERC721URIStorage {
 
     mapping(uint256 => BookTypes.bookStruct) public bookIdToBookStruct;
 
-    event BookCreated(address indexed author,string cid);
+    event BookCreated(address author, string cid, uint256 indexed bookId);
 
     constructor(uint8 feePercentage, address key) ERC721("Book", "Bk") {
         _feePercentage = feePercentage;
@@ -30,7 +30,7 @@ contract Book is ERC721URIStorage {
     }
 
     // should mint a new book
-    function createBook(string memory cid) public  {
+    function createBook(string memory cid) public {
         _tokenIds.increment();
         uint256 newBookId = _tokenIds.current();
         _safeMint(msg.sender, newBookId);
@@ -38,13 +38,13 @@ contract Book is ERC721URIStorage {
 
         BookTypes.bookStruct storage newBook = bookIdToBookStruct[newBookId];
         newBook.cid = cid;
-        emit BookCreated(msg.sender, cid);   
+        emit BookCreated(msg.sender, cid, newBookId);
     }
 
     // emit the time left till book deal is over
     // can only view the book forever(till the deal ends)
     function buyAccess(uint256 bookId) public payable {
-        uint256 keyId=_key.getUserKey(msg.sender);
+        uint256 keyId = _key.getUserKey(msg.sender);
         BookTypes.bookStruct storage bookDetails = bookIdToBookStruct[bookId];
 
         require(msg.value >= bookDetails.purchasePrice, "not enough FIL sent");
@@ -68,16 +68,16 @@ contract Book is ERC721URIStorage {
         return ((100 - feePercentage) * price) / 100;
     }
 
-    function canAccessBook(uint256 bookId)external view returns(bool){
+    function canAccessBook(uint256 bookId,address caller) external view returns (bool) {
+        require(caller==msg.sender,"Address mismatch");
         // using lighthouse, I can't query based on NFT, so this is a simple work around
 
-        uint256 keyId=_key.getUserKey(msg.sender);
-        BookTypes.bookStruct storage bookDetails=bookIdToBookStruct[bookId];
-        if(bookDetails.keyToPeriod[keyId]>block.timestamp){
+        uint256 keyId = _key.getUserKey(caller);
+        BookTypes.bookStruct storage bookDetails = bookIdToBookStruct[bookId];
+        if (bookDetails.keyToPeriod[keyId] > block.timestamp) {
             return true;
         }
         return false;
-        
     }
 
     // check if the period of rentage is less than the deal period
@@ -100,4 +100,9 @@ contract Book is ERC721URIStorage {
     // by default, a person can view his books through his wallet address
     // it will create a transferrable nft called key which can be used to access his collection
     function createCollection(uint256 keyId) public {}
+
+    function setBookPrice(uint256 bookId, uint256 purchasePrice, uint256 rentPrice) public {
+        bookIdToBookStruct[bookId].purchasePrice = purchasePrice;
+        bookIdToBookStruct[bookId].pricePerEpoch = rentPrice;
+    }
 }

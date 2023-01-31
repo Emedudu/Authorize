@@ -1,12 +1,16 @@
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { useContext, useEffect, useRef, useState } from "react";
+import { Fragment, useContext, useEffect, useRef, useState } from "react";
 import { useBookData } from "@/lib/hooks";
 import FileInput from "@/components/FileInput";
 import TextArea from "@/components/TextArea";
 import { FaHandPointRight } from "react-icons/fa";
 import { useForm } from "react-hook-form";
-import { deployMetadataToIpfs } from "@/lib/helpers";
+import {
+  applyAccessConditions,
+  deployMetadataToIpfs,
+  getMetadataFromHash,
+} from "@/lib/helpers";
 import { VscDebugContinueSmall } from "react-icons/vsc";
 import {
   useAccount,
@@ -15,19 +19,140 @@ import {
   useWaitForTransaction,
 } from "wagmi";
 import bookABI from "@/abi/Book.json";
+import bookshopABI from "@/abi/Bookshop.json";
 import { Web3Button } from "@web3modal/react";
-import { LoaderContext } from "@/lib/context";
-// import { Web3Button, Web3NetworkSwitch } from "@web3modal/react";
+import { LoaderContext, UserContext } from "@/lib/context";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { Button, Modal } from "flowbite-react";
 
+function UploadBookModal() {
+  const router = useRouter();
+  const { id } = router.query;
+
+  const bookData = useBookData(id);
+
+  const { isConnected } = useAccount();
+  const [showModal, setShowModal] = useState(false);
+
+  const [purchasePrice, setPurchasePrice] = useState(0);
+  const [rentPrice, setRentPrice] = useState(0);
+
+  const { config: configToApprove } = usePrepareContractWrite({
+    address: bookABI.address,
+    abi: bookABI.abi,
+    chainId: 3141,
+    functionName: "approve",
+    args: [bookshopABI.address, parseInt(id)],
+    onSettled: (data, error) => {
+      console.log({ data, error });
+    },
+  });
+
+  const {
+    data: approveData,
+    isLoading: approveIsLoading,
+    error: approveError,
+    isError: approveIsError,
+    isSuccess: approveIsSuccess,
+    write: approve,
+  } = useContractWrite(configToApprove);
+
+  useWaitForTransaction({
+    hash: approveData?.hash,
+    onSettled(data, error) {
+      upload?.();
+    },
+  });
+
+  const { config: configToUpload } = usePrepareContractWrite({
+    address: bookshopABI.address,
+    abi: bookshopABI.abi,
+    chainId: 3141,
+    functionName: "uploadBook",
+    args: [parseInt(id), parseInt(purchasePrice), parseInt(rentPrice)],
+    overrides: {
+      gasLimit: 1000000,
+    },
+    onSettled: (data, error) => {
+      console.log({ data, error });
+    },
+  });
+
+  const {
+    data: uploadData,
+    isLoading: uploadIsLoading,
+    error: uploadError,
+    isError: uploadIsError,
+    isSuccess: uploadIsSuccess,
+    write: upload,
+  } = useContractWrite(configToUpload);
+
+  useWaitForTransaction({
+    hash: uploadData?.hash,
+    onSettled(data, error) {
+      setShowModal(false);
+    },
+  });
+
+  const uploadToBookshop = async () => {
+    // console.log(bookData);
+    const { contentHash } = await getMetadataFromHash(bookData.metadata);
+    console.log(contentHash);
+    await applyAccessConditions(contentHash, bookABI.address, parseInt(id));
+
+    approve?.();
+    // upload?.();
+  };
+
+  return (
+    <Fragment>
+      <button
+        className="flex items-center justify-center h-full lg:w-1/4 bg-gradient-to-br from-[#fceabb] to-[#f8b500] hover:bg-gradient-to-bl p-5"
+        onClick={() => isConnected && setShowModal(true)}
+      >
+        {isConnected ? (
+          <p className="flex items-center">
+            Upload Book to AUTHORize store{" "}
+            <VscDebugContinueSmall className="ml-2" />
+          </p>
+        ) : (
+          <Web3Button />
+        )}
+      </button>
+
+      <Modal show={showModal} onClose={() => setShowModal(false)}>
+        <Modal.Header>Terms of Service</Modal.Header>
+        <Modal.Body>
+          <input
+            placeholder="enter a purchase price"
+            onChange={(e) => setPurchasePrice(e.target.value)}
+          />
+          <input
+            placeholder="enter a rent price"
+            onChange={(e) => setRentPrice(e.target.value)}
+          />
+        </Modal.Body>
+        <Modal.Footer>
+          <Button color="gray" onClick={uploadToBookshop}>
+            Upload
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </Fragment>
+  );
+}
 export default function Home() {
   const router = useRouter();
   const { id } = router.query;
 
   // bookData returns data from firebase
-  // ipfsHash has to be fetched and parsed first
+  // metadata has to be fetched and parsed first
   const bookData = useBookData(id);
 
   const { setLoading } = useContext(LoaderContext);
+  const { username } = useContext(UserContext);
+
   const submitRef = useRef(null);
 
   const [imageData, setImageData] = useState(bookData.imageData);
@@ -42,29 +167,34 @@ export default function Home() {
 
   const { address, isConnected } = useAccount();
 
-  const { config } = usePrepareContractWrite({
+  const { config: configToMint } = usePrepareContractWrite({
     address: bookABI.address,
     abi: bookABI.abi,
     chainId: 3141,
     functionName: "createBook",
-    args: [1],
+    args: [id],
   });
 
-  const { data, isLoading, error, isError, isSuccess, write } =
-    useContractWrite(config);
-
-  console.log("data", data);
+  const {
+    data: mintData,
+    isLoading: mintIsLoading,
+    error: mintError,
+    isError: mintIsError,
+    isSuccess: mintIsSuccess,
+    write: mint,
+  } = useContractWrite(configToMint);
 
   useWaitForTransaction({
-    hash: data?.hash,
+    hash: mintData?.hash,
     onSettled(data, error) {
-      console.log("Settled", { data, error });
+      const bookId = parseInt(data.logs[0].topics[3]);
+      router.push(`/books/${bookId}/edit`);
     },
   });
 
   const callDeployMetadata = async (val) => {
-    setLoading(true);
     const { name, description } = val;
+
     try {
       const res = await deployMetadataToIpfs({
         name,
@@ -72,14 +202,25 @@ export default function Home() {
         imageData: JSON.stringify(imageData),
         contentData: JSON.stringify(contentData),
       });
-      write?.();
 
+      const docRef = doc(db, "books", res.Hash);
+      await setDoc(docRef, {
+        name,
+        metadata: res.Hash,
+        genre: "",
+        author: username,
+        buyingPrice: 0,
+        sellingPrice: 0,
+        tag: "",
+      });
+
+      router.push(`/books/${res.Hash}/edit`);
       // set access conditions on lighthouse for the contentData once the book has been created onChain and the bookId retrieved
     } catch (error) {
       console.log(error);
     }
-    setLoading(false);
   };
+
   return (
     <>
       <Head>
@@ -152,19 +293,49 @@ export default function Home() {
             <button type="submit" ref={submitRef}></button>
           </form>
         </section>
-        <button
-          className="flex items-center justify-center h-full lg:w-1/4 bg-gradient-to-br from-[#fceabb] to-[#f8b500] hover:bg-gradient-to-bl p-5"
-          disabled={!write}
-          onClick={() => isConnected && submitRef.current.click()}
-        >
-          {isConnected ? (
-            <p className="flex items-center">
-              Continue <VscDebugContinueSmall className="ml-2" />
-            </p>
-          ) : (
-            <Web3Button />
-          )}
-        </button>
+        {id == "new" ? (
+          <button
+            className="flex items-center justify-center h-full lg:w-1/4 bg-gradient-to-br from-[#fceabb] to-[#f8b500] hover:bg-gradient-to-bl p-5"
+            onClick={() => isConnected && submitRef.current.click()}
+          >
+            {isConnected ? (
+              <p className="flex items-center">
+                Deploy Book <VscDebugContinueSmall className="ml-2" />
+              </p>
+            ) : (
+              <Web3Button />
+            )}
+          </button>
+        ) : isNaN(id) ? (
+          <button
+            className="flex items-center justify-center h-full lg:w-1/4 bg-gradient-to-br from-[#fceabb] to-[#f8b500] hover:bg-gradient-to-bl p-5"
+            onClick={() => isConnected && mint?.()}
+          >
+            {isConnected ? (
+              <p className="flex items-center">
+                Mint Book onChain <VscDebugContinueSmall className="ml-2" />
+              </p>
+            ) : (
+              <Web3Button />
+            )}
+          </button>
+        ) : (
+          <UploadBookModal />
+
+          // <button
+          //   className="flex items-center justify-center h-full lg:w-1/4 bg-gradient-to-br from-[#fceabb] to-[#f8b500] hover:bg-gradient-to-bl p-5"
+          //   onClick={() => isConnected && upload?.()}
+          // >
+          //   {isConnected ? (
+          //     <p className="flex items-center">
+          //       Upload Book to AUTHORize store{" "}
+          //       <VscDebugContinueSmall className="ml-2" />
+          //     </p>
+          //   ) : (
+          //     <Web3Button />
+          //   )}
+          // </button>
+        )}
       </main>
     </>
   );

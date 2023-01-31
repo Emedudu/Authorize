@@ -1,6 +1,6 @@
 export const voidBookData = {
   name: "",
-  ipfshash: "",
+  metadata: "",
   genre: "",
   author: "",
   buyingPrice: 0,

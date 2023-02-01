@@ -90,11 +90,11 @@ export const applyAccessConditions = async (cid, contractAddress, bookId) => {
       contractAddress: contractAddress,
       returnValueTest: {
         comparator: "==",
-        value: "1",
+        value: "true",
       },
       parameters: [bookId, ":userAddress"],
       inputArrayType: ["uint256", "address"],
-      outputType: "uint8",
+      outputType: "bool",
     },
   ];
 

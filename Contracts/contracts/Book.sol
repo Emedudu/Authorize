@@ -68,16 +68,14 @@ contract Book is ERC721URIStorage {
         return ((100 - feePercentage) * price) / 100;
     }
 
-    function canAccessBook(uint256 bookId,address caller) external view returns (uint8) {
-        require(caller==msg.sender,"Address mismatch");
+    function canAccessBook(uint256 bookId,address caller) external view returns (bool) {
         // using lighthouse, I can't query based on NFT, so this is a simple work around
-
         uint256 keyId = _key.getUserKey(caller);
         BookTypes.bookStruct storage bookDetails = bookIdToBookStruct[bookId];
         if (bookDetails.keyToPeriod[keyId] > block.timestamp) {
-            return 1;
+            return true;
         }
-        return 0;
+        return false;
     }
 
     // check if the period of rentage is less than the deal period

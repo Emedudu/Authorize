@@ -68,10 +68,10 @@ export const deployMetadataToIpfs = async (obj) => {
 };
 
 export const getMetadataFromHash = async (hash) => {
-  const metadataRes = await axios.get(
-    `https://gateway.lighthouse.storage/ipfs/${hash}`
-  );
-  const { name, description, imageData, contentData } = metadataRes;
+  const { data } = await axios.get(`/api/ipfs/${hash}`);
+  console.log(data);
+
+  const { name, description, imageData, contentData } = data;
   return {
     name,
     description,
@@ -90,26 +90,31 @@ export const applyAccessConditions = async (cid, contractAddress, bookId) => {
       contractAddress: contractAddress,
       returnValueTest: {
         comparator: "==",
-        value: "true",
+        value: "1",
       },
       parameters: [bookId, ":userAddress"],
-      inputArrayType: [uint, address],
-      outputType: "boolean",
+      inputArrayType: ["uint256", "address"],
+      outputType: "uint8",
     },
   ];
 
   const aggregator = "([1])";
   const { publicKey, signedMessage } = await encryptionSignature();
 
-  const response = await lighthouse.accessCondition(
-    publicKey,
-    cid,
-    signedMessage,
-    conditions,
-    aggregator
-  );
+  try {
+    console.log(publicKey, cid, signedMessage, conditions, aggregator);
+    const response = await lighthouse.accessCondition(
+      publicKey,
+      cid,
+      signedMessage,
+      conditions,
+      aggregator
+    );
 
-  console.log(response);
+    console.log("response:", response);
+  } catch (error) {
+    console.log("error:", error);
+  }
 };
 
 export const shortenAddress = (address) => {

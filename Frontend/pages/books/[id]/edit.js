@@ -98,7 +98,7 @@ function UploadBookModal() {
   const uploadToBookshop = async () => {
     // console.log(bookData);
     const { contentHash } = await getMetadataFromHash(bookData.metadata);
-    console.log(contentHash);
+    console.log(contentHash, bookABI.address, parseInt(id));
     await applyAccessConditions(contentHash, bookABI.address, parseInt(id));
 
     approve?.();

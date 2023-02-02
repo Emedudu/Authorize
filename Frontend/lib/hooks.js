@@ -2,7 +2,16 @@ import { useEffect, useState } from "react";
 import { db, getBookData, getUserData } from "./firebase";
 import { voidBookData, voidUserData } from "./constants";
 import { useAccount } from "wagmi";
-import { collection, doc, getDoc, getDocs, query } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  limit,
+  orderBy,
+  query,
+  where,
+} from "firebase/firestore";
 import { getMetadataFromHash } from "./helpers";
 
 export function useUserData(username) {
@@ -33,17 +42,25 @@ export function useUserData(username) {
   return userData;
 }
 
-export function useBooks() {
+export function useBooks(whereQuery = [], limitQuery = 20) {
   const [books, setBooks] = useState([]);
 
-  const getBooks = async () => {
-    const docRef = query(collection(db, "books"));
+  const getBooks = async (whereQuery, limitQuery) => {
+    let docRef;
+    if (whereQuery?.length == 3) {
+      docRef = query(
+        collection(db, "books"),
+        where(whereQuery[0], whereQuery[1], whereQuery[2]),
+        limit(limitQuery)
+      );
+    } else {
+      docRef = query(collection(db, "books"), limit(limitQuery));
+    }
+
     let res = [];
     const docSnap = await getDocs(docRef);
 
     docSnap.forEach((doc) => {
-      // const { metadata: hash } = doc.data();
-      // const metadata = await getMetadataFromHash(hash);
       res.push({ ...doc.data(), id: doc.id });
     });
 
@@ -59,13 +76,31 @@ export function useBooks() {
   };
 
   useEffect(() => {
-    getBooks().then((res) => setBooks(res));
-  }, []);
+    getBooks(whereQuery, limitQuery).then((res) => setBooks(res));
+  }, [whereQuery[2]]);
   return books;
 }
 
 export function useBookData(bookId) {
   const [bookData, setBookData] = useState(voidBookData);
+
+  const getBookData = async (id) => {
+    try {
+      const docRef = doc(db, "books", id);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        const { metadata: hash } = data;
+        const metadata = await getMetadataFromHash(hash);
+        return { ...data, ...metadata };
+      } else {
+        return voidBookData;
+      }
+    } catch (error) {
+      return voidBookData;
+    }
+  };
+
   useEffect(() => {
     if (bookId != "new") {
       getBookData(bookId).then((res) => setBookData(res));

@@ -1,5 +1,8 @@
 export const voidBookData = {
   name: "",
+  description: "",
+  imageHash: "",
+  contentHash: "",
   metadata: "",
   genre: "",
   author: "",

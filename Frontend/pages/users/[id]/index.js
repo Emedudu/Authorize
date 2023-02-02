@@ -1,10 +1,11 @@
-import { useUserData } from "@/lib/hooks";
+import { useBooks, useUserData } from "@/lib/hooks";
 import Head from "next/head";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useAccount } from "wagmi";
 import { CiEdit } from "react-icons/ci";
 import Link from "next/link";
+import Book from "@/components/Book";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -12,6 +13,8 @@ export default function Dashboard() {
 
   const { userAvatar, userETH, username, userAbout } = useUserData(id);
   const { address } = useAccount();
+
+  const ownedBooks = useBooks(["author", "==", username]);
 
   return (
     <>
@@ -54,10 +57,15 @@ export default function Dashboard() {
 
         <section className="w-full flex flex-col space-y-3">
           <div className=" border bg-white flex flex-col p-4 relative h-[calc(100vh-128px)]">
-            Owned Books
+            <p>Owned Books</p>
+            <div className="flex">
+              {ownedBooks.map((obj, i) => (
+                <Book details={obj} key={i} />
+              ))}
+            </div>
           </div>
           <div className=" border bg-white flex flex-col p-4 relative h-[calc(100vh-128px)]">
-            Accessible Books
+            <p>Accessible Books</p>
           </div>
         </section>
       </main>

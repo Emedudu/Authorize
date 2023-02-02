@@ -10,18 +10,20 @@ export default function Home() {
   const router = useRouter();
   const { id } = router.query;
 
-  const bookData = {
-    image:
-      "https://images.unsplash.com/photo-1554629947-334ff61d85dc?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1024&h=1280&q=80",
-    name: "The perfect marriage",
-    description:
-      "blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah ",
-    author:
-      "blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah ",
-    price: 4.99,
-    rentPrice: 2,
-    id: 1,
-  };
+  // const bookData = {
+  //   image:
+  //     "https://images.unsplash.com/photo-1554629947-334ff61d85dc?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1024&h=1280&q=80",
+  //   name: "The perfect marriage",
+  //   description:
+  //     "blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah ",
+  //   author:
+  //     "blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah ",
+  //   price: 4.99,
+  //   rentPrice: 2,
+  //   id: 1,
+  // };
+
+  const bookData = useBookData(id);
   // const bookData = useBookData(id);
   //   const { config } = usePrepareContractWrite({
   //     address: abi.address,
@@ -48,7 +50,7 @@ export default function Home() {
           <div className="flex items-center justify-center">
             <div className="relative h-96 w-64">
               <Image
-                src={bookData.image}
+                src={`https://gateway.lighthouse.storage/ipfs/${bookData.imageHash}`}
                 fill={true}
                 className="rounded-lg shadow-xl shadow-orange-500/50"
               />
@@ -58,16 +60,23 @@ export default function Home() {
             <div className="flex justify-end space-x-3 p-2">
               <button className="flex flex-col items-center border-2 border-lime-700 text-lime-700 hover:text-white hover:bg-lime-500 rounded-lg p-2 hover:scale-105 ">
                 <span className="font-semibold">Buy Access</span>
-                <span className="font-light text-sm">@ ${bookData.price}</span>
+                <span className="font-light text-sm">
+                  @ ${bookData.purchasePrice || 0}
+                </span>
               </button>
 
               <button className="flex flex-col items-center border-2 border-yellow-500 text-yellow-500 hover:text-white hover:bg-yellow-500 rounded-lg p-2 hover:scale-105">
                 <span className="font-semibold">Rent Access</span>
                 <span className="font-light text-sm">
-                  @ ${bookData.rentPrice}
+                  @ ${bookData.rentPrice || 0}
                 </span>
               </button>
-              <button>Read Book</button>
+              <a
+                href={`https://gateway.lighthouse.storage/ipfs/${bookData.contentHash}`}
+                target="_blank"
+              >
+                Read Book
+              </a>
             </div>
             <div className="overflow-y-scroll ">
               <h5 className="text-lg capitalize font-semibold text-left text-gray-700">

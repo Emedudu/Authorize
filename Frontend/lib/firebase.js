@@ -51,17 +51,3 @@ export const getUserData = async (username) => {
     }
   }
 };
-
-export const getBookData = async (id) => {
-  try {
-    const docRef = doc(db, "books", id);
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      return docSnap.data();
-    } else {
-      return voidBookData;
-    }
-  } catch (error) {
-    return voidBookData;
-  }
-};

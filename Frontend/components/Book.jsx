@@ -26,7 +26,7 @@ function Book({ details }) {
         <p>
           Price:{" "}
           <span className="hover:underline hover:text-orange-700">
-            $ {details.purchasePrice || 0}
+            ${details.purchasePrice || 0}
           </span>
         </p>
       </div>

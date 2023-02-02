@@ -24,10 +24,10 @@ contract Book is ERC721URIStorage {
         _key = Key(key);
     }
 
-    // onlyOwner
-    function setFeePercentage(uint8 feePercentage) external {
-        _feePercentage = feePercentage;
-    }
+    // only callable by bookshop dao which is the onlyOwner
+    // function setFeePercentage(uint8 feePercentage) external {
+    //     _feePercentage = feePercentage;
+    // }
 
     // should mint a new book
     function createBook(string memory cid) public {

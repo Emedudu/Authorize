@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { db, getBookData, getUserData } from "./firebase";
 import { voidBookData, voidUserData } from "./constants";
 import { useAccount } from "wagmi";
-import { doc, getDoc } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, query } from "firebase/firestore";
+import { getMetadataFromHash } from "./helpers";
 
 export function useUserData(username) {
   const { address } = useAccount();
@@ -30,6 +31,37 @@ export function useUserData(username) {
   }, [address, username]);
 
   return userData;
+}
+
+export function useBooks() {
+  const [books, setBooks] = useState([]);
+
+  const getBooks = async () => {
+    const docRef = query(collection(db, "books"));
+    let res = [];
+    const docSnap = await getDocs(docRef);
+
+    docSnap.forEach((doc) => {
+      // const { metadata: hash } = doc.data();
+      // const metadata = await getMetadataFromHash(hash);
+      res.push({ ...doc.data(), id: doc.id });
+    });
+
+    const result = Promise.all(
+      res.map(async (obj) => {
+        const { metadata: hash } = obj;
+        const metadata = await getMetadataFromHash(hash);
+        return { ...obj, ...metadata };
+      })
+    ).then((res) => res);
+
+    return result;
+  };
+
+  useEffect(() => {
+    getBooks().then((res) => setBooks(res));
+  }, []);
+  return books;
 }
 
 export function useBookData(bookId) {

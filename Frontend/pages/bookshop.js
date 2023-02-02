@@ -1,7 +1,12 @@
 import Book from "@/components/Book";
+import { db } from "@/lib/firebase";
+import { getMetadataFromHash } from "@/lib/helpers";
+import { useBooks } from "@/lib/hooks";
+import { collection, getDocs, query } from "firebase/firestore";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export default function Home() {
   const sampleBooks = [
@@ -41,6 +46,9 @@ export default function Home() {
       id: 1,
     },
   ];
+
+  const books = useBooks();
+
   return (
     <>
       <Head>
@@ -156,7 +164,7 @@ export default function Home() {
           </form>
         </div>
         <div className="mt-3">
-          {sampleBooks.map((obj, i) => (
+          {books.map((obj, i) => (
             <Book details={obj} key={i} />
           ))}
         </div>

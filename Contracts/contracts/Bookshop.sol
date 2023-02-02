@@ -25,21 +25,8 @@ contract Bookshop {
     function uploadBook(uint256 bookId, uint256 purchasePrice, uint256 rentPrice) external {
         require(bookIdToOwner[bookId]==address(0),"Book already uploaded");
         _book.setBookPrice(bookId, purchasePrice, rentPrice);
-
-        _book.safeTransferFrom(msg.sender, address(this), bookId);
         bookIdToOwner[bookId] = msg.sender;
         emit BookPublished(bookId,purchasePrice,rentPrice);
-    }
-
-    function withdrawProfit(uint256 bookId) public {
-        require(bookIdToOwner[bookId] == msg.sender, "Not book owner");
-        uint256 initialBalance = address(this).balance;
-        _book.withdrawProfit(bookId);
-        uint256 finalBalance = address(this).balance;
-        uint256 profit = finalBalance - initialBalance;
-        if (profit > 0) {
-            payable(msg.sender).transfer(profit);
-        }
     }
 
     function swapKeys(address user1, address user2) external {
@@ -53,7 +40,4 @@ contract Bookshop {
         _key.setUserKey(user1, user2Key);
         _key.setUserKey(user2, user1Key);
     }
-
-    // callable by the bookshop DAO
-    function setFeePercentage() public {}
 }

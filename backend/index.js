@@ -10,11 +10,13 @@ import {
   getDoc,
   getFirestore,
   setDoc,
+  updateDoc,
 } from "firebase/firestore";
 import { createRequire } from "module"; // Bring in the ability to create the 'require' method
 const require = createRequire(import.meta.url); // construct the require method
 const testABI = require("./abi/Test.json"); // use the require method
 const bookABI = require("./abi/Book.json");
+const bookshopABI = require("./abi/Bookshop.json");
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -67,6 +69,11 @@ const bookContract = new ethers.Contract(
   bookABI.abi,
   provider
 );
+const bookshopContract = new ethers.Contract(
+  bookshopABI.address,
+  bookshopABI.abi,
+  provider
+);
 
 const testFilterAdd = {
   address: testABI.address,
@@ -81,6 +88,14 @@ const bookFilterCreate = {
   topics: [
     // the name of the event, parnetheses containing the data type of each event, no spaces
     utils.id("BookCreated(address,string,uint256)"),
+  ],
+};
+
+const bookshopFilterUpload = {
+  address: bookshopABI.address,
+  topics: [
+    // the name of the event, parnetheses containing the data type of each event, no spaces
+    utils.id("BookPublished(uint256,uint256,uint256)"),
   ],
 };
 
@@ -115,6 +130,29 @@ provider.once("block", () => {
 
       return () => {
         bookContract.removeAllListeners();
+      };
+    });
+  } catch (error) {
+    console.log("error");
+  }
+
+  try {
+    bookshopContract.on(bookshopFilterUpload, async (num, ...event) => {
+      // console.log("num", num);
+      // console.log("event", event);
+
+      const docRef = doc(db, "books", num);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        await updateDoc(docRef, {
+          purchasePrice: event[0],
+          rentPrice: event[1],
+        });
+      }
+
+      return () => {
+        bookshopContract.removeAllListeners();
       };
     });
   } catch (error) {

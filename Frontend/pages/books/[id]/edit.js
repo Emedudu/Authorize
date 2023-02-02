@@ -38,33 +38,6 @@ function UploadBookModal() {
   const [purchasePrice, setPurchasePrice] = useState(0);
   const [rentPrice, setRentPrice] = useState(0);
 
-  const { config: configToApprove } = usePrepareContractWrite({
-    address: bookABI.address,
-    abi: bookABI.abi,
-    chainId: 3141,
-    functionName: "approve",
-    args: [bookshopABI.address, parseInt(id)],
-    onSettled: (data, error) => {
-      console.log({ data, error });
-    },
-  });
-
-  const {
-    data: approveData,
-    isLoading: approveIsLoading,
-    error: approveError,
-    isError: approveIsError,
-    isSuccess: approveIsSuccess,
-    write: approve,
-  } = useContractWrite(configToApprove);
-
-  useWaitForTransaction({
-    hash: approveData?.hash,
-    onSettled(data, error) {
-      upload?.();
-    },
-  });
-
   const { config: configToUpload } = usePrepareContractWrite({
     address: bookshopABI.address,
     abi: bookshopABI.abi,
@@ -72,7 +45,7 @@ function UploadBookModal() {
     functionName: "uploadBook",
     args: [parseInt(id), parseInt(purchasePrice), parseInt(rentPrice)],
     overrides: {
-      gasLimit: 1000000,
+      gasLimit: 200000000,
     },
     onSettled: (data, error) => {
       console.log({ data, error });
@@ -100,9 +73,7 @@ function UploadBookModal() {
     const { contentHash } = await getMetadataFromHash(bookData.metadata);
     console.log(contentHash, bookABI.address, parseInt(id));
     await applyAccessConditions(contentHash, bookABI.address, parseInt(id));
-
-    approve?.();
-    // upload?.();
+    upload?.();
   };
 
   return (
@@ -122,14 +93,18 @@ function UploadBookModal() {
       </button>
 
       <Modal show={showModal} onClose={() => setShowModal(false)}>
-        <Modal.Header>Terms of Service</Modal.Header>
-        <Modal.Body>
+        <Modal.Header>Upload Book to Bookshop</Modal.Header>
+        <Modal.Body className="flex flex-col">
           <input
             placeholder="enter a purchase price"
+            type="number"
+            className="w-full"
             onChange={(e) => setPurchasePrice(e.target.value)}
           />
           <input
             placeholder="enter a rent price"
+            type="number"
+            className="w-full"
             onChange={(e) => setRentPrice(e.target.value)}
           />
         </Modal.Body>

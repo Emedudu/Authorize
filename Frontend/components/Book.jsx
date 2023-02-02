@@ -9,7 +9,10 @@ function Book({ details }) {
         className="relative h-60 w-40 hover:scale-105"
         href={`/books/${details.id}`}
       >
-        <Image src={details.image} fill={true} />
+        <Image
+          src={`https://gateway.lighthouse.storage/ipfs/${details.imageHash}`}
+          fill={true}
+        />
       </Link>
 
       <div class="text-sm text-gray-700">
@@ -19,11 +22,11 @@ function Book({ details }) {
         >
           {details.name}
         </Link>
-        <p>Rating:</p>
+        {/* <p>Rating:</p> */}
         <p>
           Price:{" "}
           <span className="hover:underline hover:text-orange-700">
-            {details.price}
+            $ {details.purchasePrice || 0}
           </span>
         </p>
       </div>

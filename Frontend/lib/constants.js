@@ -3,7 +3,8 @@ export const voidBookData = {
   metadata: "",
   genre: "",
   author: "",
-  buyingPrice: 0,
+  purchasePrice: 0,
+  rentPrice: 0,
   sellingPrice: 0,
   tag: "",
 };

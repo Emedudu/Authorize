@@ -81,38 +81,38 @@ export const getMetadataFromHash = async (hash) => {
 };
 
 export const applyAccessConditions = async (cid, contractAddress, bookId) => {
-  // const conditions = [
-  //   {
-  //     id: 1,
-  //     chain: "hyperspace",
-  //     method: "canAccessBook",
-  //     standardContractType: "Custom",
-  //     contractAddress: contractAddress,
-  //     returnValueTest: {
-  //       comparator: "==",
-  //       value: "true",
-  //     },
-  //     parameters: [bookId, ":userAddress"],
-  //     inputArrayType: ["uint256", "address"],
-  //     outputType: "bool",
-  //   },
-  // ];
   const conditions = [
     {
       id: 1,
       chain: "hyperspace",
-      method: "access",
+      method: "canAccessBook",
       standardContractType: "Custom",
-      contractAddress: "0xbe7FE66862003A94d9BE20D3C634476EE7aF630C",
+      contractAddress: contractAddress,
       returnValueTest: {
         comparator: "==",
-        value: "4",
+        value: "true",
       },
-      parameters: [],
-      inputArrayType: [],
-      outputType: "uint8",
+      parameters: [bookId, ":userAddress"],
+      inputArrayType: ["uint256", "address"],
+      outputType: "bool",
     },
   ];
+  // const conditions = [
+  //   {
+  //     id: 1,
+  //     chain: "hyperspace",
+  //     method: "access",
+  //     standardContractType: "Custom",
+  //     contractAddress: "0xbe7FE66862003A94d9BE20D3C634476EE7aF630C",
+  //     returnValueTest: {
+  //       comparator: "==",
+  //       value: "4",
+  //     },
+  //     parameters: [],
+  //     inputArrayType: [],
+  //     outputType: "uint8",
+  //   },
+  // ];
 
   const aggregator = "([1])";
   const { publicKey, signedMessage } = await encryptionSignature();

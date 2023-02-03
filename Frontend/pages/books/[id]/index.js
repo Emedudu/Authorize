@@ -30,7 +30,9 @@ export default function Home() {
     functionName: "buyAccess",
     args: [parseInt(id)],
     overrides: {
-      value: ethers.utils.parseEther(bookData?.purchasePrice?.toString() || 0),
+      value: ethers.utils.parseEther(
+        bookData?.purchasePrice?.toString() || "0"
+      ),
     },
     onSettled: (data, error) => {
       console.log({ data, error });
@@ -93,7 +95,7 @@ export default function Home() {
             <div className="flex justify-end space-x-3 p-2">
               {isBookAccessible ? (
                 <a
-                  href={`https://gateway.lighthouse.storage/ipfs/${bookData.contentHash}`}
+                  href={`https://files.lighthouse.storage/viewFile/${bookData.contentHash}`}
                   target="_blank"
                   className="flex items-center border-2 border-yellow-500 text-yellow-500 hover:text-white hover:bg-yellow-500 rounded-lg py-4 px-2 hover:scale-105"
                 >

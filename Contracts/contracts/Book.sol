@@ -45,6 +45,7 @@ contract Book is ERC721URIStorage {
     // should upload book for purchase and rent
     function uploadBook(uint256 bookId, uint256 purchasePrice, uint256 rentPrice) external {
         require(bookId>0&&bookId<=_tokenIds.current(),"Non-existent book");
+        require(ownerOf(bookId)==msg.sender,"not book owner");
         bookIdToBookStruct[bookId].purchasePrice = purchasePrice;
         bookIdToBookStruct[bookId].rentPrice = rentPrice;
         emit BookPublished(bookId,purchasePrice,rentPrice);
@@ -68,6 +69,7 @@ contract Book is ERC721URIStorage {
     }
 
     function canAccessBook(uint256 bookId,address caller) public view returns (bool) {
+        if(ownerOf(bookId)==caller)return true;
         // using lighthouse, I can't query based on NFT, so this is a simple work around
         uint256 keyId = _key.getUserKey(caller);
         if(keyId==0)return false;

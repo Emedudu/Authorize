@@ -8,6 +8,5 @@ library BookTypes {
         uint256 rentPrice;
         uint256 totalRevenue;
         mapping(uint256 => uint256) keyToPeriod;
-        address owner;
     }
 }

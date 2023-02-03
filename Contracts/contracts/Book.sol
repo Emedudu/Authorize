@@ -19,6 +19,8 @@ contract Book is ERC721URIStorage {
 
     event BookCreated(address author, string cid, uint256 indexed bookId);
 
+    event BookPublished(uint256 indexed bookId,uint256 purchasePrice,uint256 rentPrice);
+
     constructor(uint8 feePercentage, address key) ERC721("Book", "Bk") {
         _feePercentage = feePercentage;
         _key = Key(key);
@@ -30,7 +32,7 @@ contract Book is ERC721URIStorage {
     // }
 
     // should mint a new book
-    function createBook(string memory cid) public {
+    function createBook(string memory cid) external {
         _tokenIds.increment();
         uint256 newBookId = _tokenIds.current();
         _safeMint(msg.sender, newBookId);
@@ -40,37 +42,35 @@ contract Book is ERC721URIStorage {
         newBook.cid = cid;
         emit BookCreated(msg.sender, cid, newBookId);
     }
-
-    // emit the time left till book deal is over
-    // can only view the book forever(till the deal ends)
-    function buyAccess(uint256 bookId) public payable {
-        uint256 keyId = _key.getUserKey(msg.sender);
+    // should upload book for purchase and rent
+    function uploadBook(uint256 bookId, uint256 purchasePrice, uint256 rentPrice) external {
+        require(bookId>0&&bookId<=_tokenIds.current(),"Non-existent book");
+        bookIdToBookStruct[bookId].purchasePrice = purchasePrice;
+        bookIdToBookStruct[bookId].rentPrice = rentPrice;
+        emit BookPublished(bookId,purchasePrice,rentPrice);
+    }
+    // allows caller to view the book forever
+    function buyAccess(uint256 bookId) external payable {
         BookTypes.bookStruct storage bookDetails = bookIdToBookStruct[bookId];
-
         require(msg.value >= bookDetails.purchasePrice, "not enough FIL sent");
-
+        uint256 keyId = _key.getUserKey(msg.sender);
+        if(keyId==0){_key.generateKey(msg.sender);keyId=_key.getUserKey(msg.sender);}
+       
         bookDetails.keyToPeriod[keyId] = 2 ** 256 - 1;
-        bookDetails.totalRevenue += calculateProfit(_feePercentage, bookDetails.purchasePrice);
+        bookDetails.totalRevenue += _calculateProfit(_feePercentage, bookDetails.purchasePrice);
         _key.addBook(keyId, bookId);
     }
-
-    function withdrawProfit(uint256 bookId) public payable {
+    // allow owner of book to withdraw his profit
+    function withdrawProfit(uint256 bookId) external payable {
         require(ownerOf(bookId) == msg.sender, "Not the owner of the book");
         bookIdToBookStruct[bookId].totalRevenue = 0;
         payable(ownerOf(bookId)).transfer(bookIdToBookStruct[bookId].totalRevenue);
     }
 
-    function getPurchasePrice(uint256 bookId) public view returns (uint256) {
-        return bookIdToBookStruct[bookId].purchasePrice;
-    }
-
-    function calculateProfit(uint8 feePercentage, uint256 price) internal pure returns (uint256) {
-        return ((100 - feePercentage) * price) / 100;
-    }
-
-    function canAccessBook(uint256 bookId,address caller) external view returns (bool) {
+    function canAccessBook(uint256 bookId,address caller) public view returns (bool) {
         // using lighthouse, I can't query based on NFT, so this is a simple work around
         uint256 keyId = _key.getUserKey(caller);
+        if(keyId==0)return false;
         BookTypes.bookStruct storage bookDetails = bookIdToBookStruct[bookId];
         if (bookDetails.keyToPeriod[keyId] > block.timestamp) {
             return true;
@@ -78,29 +78,15 @@ contract Book is ERC721URIStorage {
         return false;
     }
 
-    // check if the period of rentage is less than the deal period
-    // emit the time left till rent expires
-    // can only view the book till rent expires
     function rentAccessToBook(uint256 keyId) public {}
 
-    // sell book ownership(callable by owner of the book alone)
-    // it can be forever or a pasticular period(lease)
-    // becomes new owner of book, and can republish
     function sellBookOwnership(uint256 keyId) public {}
 
-    // buy book ownership
-    // it can be forever or a pasticular period(borrow)
-    // becomes owner of book for a particular amount of time, and can republish during that period
     function buyBookOwnership(uint256 keyId) public {}
 
-    // TODO: create collection
-    // a user can create a collection for all his books(those he can view and those he owns)
-    // by default, a person can view his books through his wallet address
-    // it will create a transferrable nft called key which can be used to access his collection
-    function createCollection(uint256 keyId) public {}
-
-    function setBookPrice(uint256 bookId, uint256 purchasePrice, uint256 rentPrice) public {
-        bookIdToBookStruct[bookId].purchasePrice = purchasePrice;
-        bookIdToBookStruct[bookId].pricePerEpoch = rentPrice;
+    function _calculateProfit(uint8 feePercentage, uint256 price) internal pure returns (uint256) {
+        return ((100 - feePercentage) * price) / 100;
     }
+
+    receive()external payable{}
 }

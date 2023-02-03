@@ -81,20 +81,36 @@ export const getMetadataFromHash = async (hash) => {
 };
 
 export const applyAccessConditions = async (cid, contractAddress, bookId) => {
+  // const conditions = [
+  //   {
+  //     id: 1,
+  //     chain: "hyperspace",
+  //     method: "canAccessBook",
+  //     standardContractType: "Custom",
+  //     contractAddress: contractAddress,
+  //     returnValueTest: {
+  //       comparator: "==",
+  //       value: "true",
+  //     },
+  //     parameters: [bookId, ":userAddress"],
+  //     inputArrayType: ["uint256", "address"],
+  //     outputType: "bool",
+  //   },
+  // ];
   const conditions = [
     {
       id: 1,
       chain: "hyperspace",
-      method: "canAccessBook",
+      method: "access",
       standardContractType: "Custom",
-      contractAddress: contractAddress,
+      contractAddress: "0xbe7FE66862003A94d9BE20D3C634476EE7aF630C",
       returnValueTest: {
         comparator: "==",
-        value: "true",
+        value: "4",
       },
-      parameters: [bookId, ":userAddress"],
-      inputArrayType: ["uint256", "address"],
-      outputType: "bool",
+      parameters: [],
+      inputArrayType: [],
+      outputType: "uint8",
     },
   ];
 

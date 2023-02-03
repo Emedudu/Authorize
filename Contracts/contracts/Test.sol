@@ -14,8 +14,8 @@ contract Test {
         emit Added(msg.sender);
     }
 
-    function access(uint256 age,address user)external pure returns(uint8){
-        require(user!=address(0)&&age>=18,"address required");
+    function access()external pure returns(uint8){
+        // require(user!=address(0)&&age>=18,"address required");
         return 4;
     }
 }

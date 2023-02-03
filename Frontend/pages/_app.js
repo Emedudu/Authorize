@@ -15,6 +15,7 @@ import { useEffect, useState } from "react";
 import { configureChains, createClient, useAccount, WagmiConfig } from "wagmi";
 import { jsonRpcProvider } from "wagmi/providers/jsonRpc";
 
+// blockExplorerUrl:https://hyperspace.filfox.info
 const hyperspace = {
   id: 3141,
   name: "Filecoin — Hyperspace testnet",
@@ -28,7 +29,10 @@ const hyperspace = {
     default: { http: ["https://api.hyperspace.node.glif.io/rpc/v1"] },
   },
   blockExplorers: {
-    default: { name: "Glif", url: "https://hyperspace.filfox.info" },
+    default: {
+      name: "Glif",
+      url: "https://explorer.glif.io/?network=hyperspace",
+    },
   },
   testnet: true,
 };

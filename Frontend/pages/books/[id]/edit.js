@@ -19,12 +19,12 @@ import {
   useWaitForTransaction,
 } from "wagmi";
 import bookABI from "@/abi/Book.json";
-import bookshopABI from "@/abi/Bookshop.json";
 import { Web3Button } from "@web3modal/react";
 import { LoaderContext, UserContext } from "@/lib/context";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Button, Modal } from "flowbite-react";
+import { ethers } from "ethers";
 
 function UploadBookModal() {
   const router = useRouter();
@@ -35,18 +35,20 @@ function UploadBookModal() {
   const { isConnected } = useAccount();
   const [showModal, setShowModal] = useState(false);
 
-  const [purchasePrice, setPurchasePrice] = useState(0);
-  const [rentPrice, setRentPrice] = useState(0);
+  const [purchasePrice, setPurchasePrice] = useState("0");
+  const [rentPrice, setRentPrice] = useState("0");
 
   const { config: configToUpload } = usePrepareContractWrite({
-    address: bookshopABI.address,
-    abi: bookshopABI.abi,
+    address: bookABI.address,
+    abi: bookABI.abi,
     chainId: 3141,
     functionName: "uploadBook",
-    args: [parseInt(id), parseInt(purchasePrice), parseInt(rentPrice)],
-    overrides: {
-      gasLimit: 200000000,
-    },
+    args: [
+      parseInt(id),
+      ethers.utils.parseEther(purchasePrice),
+      ethers.utils.parseEther(rentPrice),
+    ],
+
     onSettled: (data, error) => {
       console.log({ data, error });
     },

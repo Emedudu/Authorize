@@ -12,6 +12,7 @@ function Book({ details }) {
         <Image
           src={`https://gateway.lighthouse.storage/ipfs/${details.imageHash}`}
           fill={true}
+          className="rounded shadow"
         />
       </Link>
 

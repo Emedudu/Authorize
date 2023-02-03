@@ -5,8 +5,9 @@ library BookTypes {
     struct bookStruct {
         string cid;
         uint256 purchasePrice;
+        uint256 rentPrice;
         uint256 totalRevenue;
-        uint256 pricePerEpoch;
         mapping(uint256 => uint256) keyToPeriod;
+        address owner;
     }
 }

@@ -30,52 +30,20 @@ export default function Home() {
   //   functionName: "integer",
   // });
 
-  const { config: configToMint } = usePrepareContractWrite({
+  const {
+    data: myKeyId,
+    isError,
+    isLoading,
+  } = useContractRead({
     address: keyABI.address,
-    abi: [
-      {
-        inputs: [
-          { internalType: "uint256", name: "keyId", type: "uint256" },
-          { internalType: "uint256", name: "bookId", type: "uint256" },
-        ],
-        name: "addBook",
-        outputs: [],
-        stateMutability: "nonpayable",
-        type: "function",
-      },
-    ],
-    chainId: 3141,
-    functionName: "addBook(uint256,uint256)",
-    args: [5, 4],
-    onSettled: (data, error) => {
-      console.log({ data, error });
+    abi: keyABI.abi,
+    functionName: "getUserKey",
+    args: [address],
+    onSettled(data, error) {
+      console.log(data.toString(), error);
     },
   });
 
-  const { data: mintData, write: mint } = useContractWrite(configToMint);
-
-  // const { configToApprove } = usePrepareContractWrite({
-  //   address: keyABI.address,
-  //   abi: keyABI.abi,
-  //   chainId: 3141,
-  //   functionName: "approve",
-  //   args: [bookABI.address, 1],
-  //   onSettled: (data, error) => {
-  //     console.log({ data, error });
-  //   },
-  // });
-
-  // const {
-  //   data: approveData,
-  //   isLoading: approveIsLoading,
-  //   error: approveError,
-  //   isError: approveIsError,
-  //   isSuccess: approveIsSuccess,
-  //   write: approve,
-  // } = useContractWrite(configToApprove);
-
-  // console.log(data?.toString());
-  // console.log(approveData?.toString());
   return (
     <>
       <Head>
@@ -87,7 +55,7 @@ export default function Home() {
       <main>
         <Web3Button />
         {/* <button onClick={write}>add</button> */}
-        <button onClick={() => mint?.()}>mint</button>
+        {/* <button onClick={() => mint?.()}>mint</button> */}
         {/* <button onClick={approve}>approve</button> */}
         {/* <p>{data}</p> */}
       </main>

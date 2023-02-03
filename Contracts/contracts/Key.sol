@@ -14,12 +14,13 @@ contract Key is ERC721 {
     constructor() ERC721("Key", "Ky") {}
 
     function generateKey(address caller) external returns (uint256) {
+        // require(isAdmin)
         _tokenIds.increment();
         uint256 newKeyId = _tokenIds.current();
         _safeMint(caller, newKeyId);
+        setUserKey(caller, newKeyId);
         return newKeyId;
     }
-
     // will create an internal version of _addBook
     function addBook(uint256 keyId, uint256 bookId) public {
         // probably check that it is called by the Book contract alone
@@ -33,5 +34,16 @@ contract Key is ERC721 {
     function setUserKey(address user,uint256 keyId)public{
         require(ownerOf(keyId)==user,"Not owner of key");
         ownerToKey[user]=keyId;
+    }
+    function swapKeys(address user1, address user2) external {
+        uint256 user1Key = getUserKey(user1);
+        uint256 user2Key = getUserKey(user2);
+        // check if both keys have been approved by this address to spend it
+
+        safeTransferFrom(user1, user2, user1Key);
+        safeTransferFrom(user2, user1, user2Key);
+
+        setUserKey(user1, user2Key);
+        setUserKey(user2, user1Key);
     }
 }

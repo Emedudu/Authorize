@@ -25,6 +25,7 @@ import { db } from "@/lib/firebase";
 import { ethers } from "ethers";
 import UploadSteps from "@/components/UploadSteps";
 import UploadBookModal from "@/components/UploadBookModal";
+import { toast } from "react-hot-toast";
 
 export default function Home() {
   const router = useRouter();
@@ -38,11 +39,27 @@ export default function Home() {
 
   const submitRef = useRef(null);
 
-  const [imageData, setImageData] = useState(bookData.imageData);
-  const [contentData, setContentData] = useState(bookData.fileData);
+  const [imageData, setImageData] = useState({ Hash: "" });
+  const [contentData, setContentData] = useState({ Hash: "" });
+  const [bookTitle, setBookTitle] = useState("");
+  const [bookDescription, setBookDescription] = useState("");
+
+  const [deployIsLoading, setDeployIsLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [purchasePrice, setPurchasePrice] = useState("0");
   const [rentPrice, setRentPrice] = useState("0");
+
+  useEffect(() => {
+    setImageData({ ...imageData, Hash: bookData.imageHash });
+    setContentData({ ...contentData, Hash: bookData.contentHash });
+    setBookTitle(bookData.name);
+    setBookDescription(bookData.description);
+  }, [
+    bookData.imageHash,
+    bookData.contentHash,
+    bookData.name,
+    bookData.description,
+  ]);
 
   const {
     handleSubmit,
@@ -73,8 +90,13 @@ export default function Home() {
   useWaitForTransaction({
     hash: mintData?.hash,
     onSettled(data, error) {
-      const bookId = parseInt(data.logs[0].topics[3]);
-      router.push(`/books/${bookId}/edit`);
+      if (!error) {
+        toast.success("Minted book successfully");
+        const bookId = parseInt(data.logs[0].topics[3]);
+        setTimeout(() => {
+          router.push(`/books/${bookId}/edit`);
+        }, 3000);
+      }
     },
   });
 
@@ -88,10 +110,6 @@ export default function Home() {
       ethers.utils.parseEther(purchasePrice),
       ethers.utils.parseEther(rentPrice),
     ],
-
-    onSettled: (data, error) => {
-      console.log({ data, error });
-    },
   });
 
   const {
@@ -106,24 +124,35 @@ export default function Home() {
   useWaitForTransaction({
     hash: uploadData?.hash,
     onSettled(data, error) {
-      setShowModal(false);
+      if (!error) {
+        toast.success(`Minted book ${id} successfully`);
+        setShowModal(false);
+        setTimeout(() => {
+          router.push(`/books/${id}`);
+        }, 3000);
+      }
     },
   });
 
   const callDeployMetadata = async (val) => {
-    const { name, description } = val;
+    // const { name, description } = val;
+    if (!(imageData.Hash && contentData.Hash && bookTitle && bookDescription)) {
+      toast.error("All fields are required");
+      return;
+    }
 
+    setDeployIsLoading(true);
     try {
       const res = await deployMetadataToIpfs({
-        name,
-        description,
+        name: bookTitle,
+        description: bookDescription,
         imageData: JSON.stringify(imageData),
         contentData: JSON.stringify(contentData),
       });
 
       const docRef = doc(db, "books", res.Hash);
       await setDoc(docRef, {
-        name,
+        name: bookTitle,
         metadata: res.Hash,
         genre: "",
         author: username,
@@ -132,11 +161,17 @@ export default function Home() {
         tag: "",
       });
 
-      router.push(`/books/${res.Hash}/edit`);
+      toast.success("Deployed book successfully");
+
+      setTimeout(() => {
+        router.push(`/books/${res.Hash}/edit`);
+      }, 3000);
+
       // set access conditions on lighthouse for the contentData once the book has been created onChain and the bookId retrieved
     } catch (error) {
-      console.log(error);
+      toast.error("Oops! Could not deploy to lighthouse");
     }
+    setDeployIsLoading(false);
   };
 
   return (
@@ -151,6 +186,7 @@ export default function Home() {
         <UploadSteps
           mintIsLoading={mintIsLoading}
           uploadIsLoading={uploadIsLoading}
+          deployIsLoading={deployIsLoading}
           submitRef={submitRef}
           mint={mint}
           setShowModal={setShowModal}
@@ -167,6 +203,7 @@ export default function Home() {
                 setFileData={setImageData}
                 id={"image"}
                 key={1}
+                disabled={id != "new"}
               />
             </div>
           </div>
@@ -182,6 +219,7 @@ export default function Home() {
                 setFileData={setContentData}
                 id={"content"}
                 key={2}
+                disabled={id != "new"}
               />
             </div>
           </div>
@@ -198,7 +236,10 @@ export default function Home() {
                 class="bg-gray-100 border-2 border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3 mt-3"
                 placeholder="The Pregnant Ghost"
                 required
-                {...register("name")}
+                value={bookTitle}
+                disabled={id != "new"}
+                onChange={(e) => setBookTitle(e.target.value)}
+                // {...register("name")}
               />
             </div>
 
@@ -213,7 +254,10 @@ export default function Home() {
                 class="bg-gray-100 border-2 border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3 mt-3"
                 placeholder="Write a description"
                 required
-                {...register("description")}
+                value={bookDescription}
+                disabled={id != "new"}
+                onChange={(e) => setBookDescription(e.target.value)}
+                // {...register("description")}
               />
             </div>
             <button type="submit" ref={submitRef}></button>
@@ -232,7 +276,7 @@ export default function Home() {
               }}
               disabled={mintIsLoading || uploadIsLoading}
             >
-              {mintIsLoading || uploadIsLoading ? (
+              {mintIsLoading || uploadIsLoading || deployIsLoading ? (
                 <BiLoaderCircle
                   className="animate-spin"
                   color="white"

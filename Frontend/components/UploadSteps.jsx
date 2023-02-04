@@ -1,10 +1,12 @@
 import { useBookData } from "@/lib/hooks";
 import { useRouter } from "next/router";
 import { useAccount } from "wagmi";
+import { BiLoaderCircle } from "react-icons/bi";
 
 export default function UploadSteps({
   mintIsLoading,
   uploadIsLoading,
+  deployIsLoading,
   submitRef,
   mint,
   setShowModal,
@@ -34,11 +36,19 @@ export default function UploadSteps({
         </li>
 
         <li class="flex flex-row items-center mb-10 ml-4 ">
-          <div
-            class={`absolute w-4 h-4 rounded-full mt-2 -left-2 border border-white ${
-              isConnected && id != "new" ? "bg-[green]" : "bg-gray-200"
-            }`}
-          ></div>
+          {deployIsLoading ? (
+            <BiLoaderCircle
+              className="animate-spin absolute mt-2 -left-2"
+              color="orange"
+              size={16}
+            />
+          ) : (
+            <div
+              class={`absolute w-4 h-4 rounded-full mt-2 -left-2 border border-white ${
+                isConnected && id != "new" ? "bg-[green]" : "bg-gray-200"
+              }`}
+            ></div>
+          )}
           <button
             class={`text-sm text-left font-normal leading-none text-gray-400 -mb-2 px-3 py-1 rounded hover:bg-orange-100 ${
               isConnected && id != "new" ? "text-black" : "text-gray-400"
@@ -55,7 +65,7 @@ export default function UploadSteps({
             <BiLoaderCircle
               className="animate-spin absolute mt-2 -left-2"
               color="orange"
-              size={10}
+              size={16}
             />
           ) : (
             <div
@@ -80,7 +90,7 @@ export default function UploadSteps({
             <BiLoaderCircle
               className="animate-spin absolute mt-2 -left-2"
               color="orange"
-              size={10}
+              size={16}
             />
           ) : (
             <div

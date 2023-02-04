@@ -21,6 +21,8 @@ contract Book is ERC721URIStorage {
 
     event BookPublished(uint256 indexed bookId,uint256 purchasePrice,uint256 rentPrice);
 
+    event Expires(uint256 period);
+
     constructor(uint8 feePercentage, address key) ERC721("Book", "Bk") {
         _feePercentage = feePercentage;
         _key = Key(key);
@@ -72,6 +74,8 @@ contract Book is ERC721URIStorage {
         bookDetails.keyToPeriod[keyId] = viewExpiryDate;
         bookDetails.totalRevenue += _calculateProfit(_feePercentage, bookDetails.rentPrice);
         _key.addBook(keyId, bookId);
+        
+        emit Expires(msg.value*86400/bookDetails.rentPrice);
 
     }
     // allow owner of book to withdraw his profit

@@ -1,49 +1,6 @@
 import Head from "next/head";
-import {
-  useAccount,
-  useContractRead,
-  useContractWrite,
-  usePrepareContractWrite,
-} from "wagmi";
-// import testABI from "@/abi/Test.json";
-// import bookABI from "@/abi/Book.json";
-import keyABI from "@/abi/Key.json";
-import { Web3Button, Web3NetworkSwitch } from "@web3modal/react";
-import { BigNumber, ethers } from "ethers";
 
 export default function Home() {
-  const { address } = useAccount();
-
-  // const { config } = usePrepareContractWrite({
-  //   address: testABI.address,
-  //   abi: testABI.abi,
-  //   chainId: 3141,
-  //   functionName: "add",
-  //   args: [],
-  // });
-
-  // const { write } = useContractWrite(config);
-
-  // const { data, isError, isLoading } = useContractRead({
-  //   address: testABI.address,
-  //   abi: testABI.abi,
-  //   functionName: "integer",
-  // });
-
-  const {
-    data: myKeyId,
-    isError,
-    isLoading,
-  } = useContractRead({
-    address: keyABI.address,
-    abi: keyABI.abi,
-    functionName: "getUserKey",
-    args: [address],
-    onSettled(data, error) {
-      console.log(data?.toString(), error);
-    },
-  });
-
   return (
     <>
       <Head>
@@ -52,13 +9,7 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main>
-        <Web3Button />
-        {/* <button onClick={write}>add</button> */}
-        {/* <button onClick={() => mint?.()}>mint</button> */}
-        {/* <button onClick={approve}>approve</button> */}
-        {/* <p>{data}</p> */}
-      </main>
+      <main></main>
     </>
   );
 }

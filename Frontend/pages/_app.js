@@ -12,6 +12,7 @@ import {
 import { Web3Modal } from "@web3modal/react";
 import { Router } from "next/router";
 import { useEffect, useState } from "react";
+import { Toaster } from "react-hot-toast";
 import { configureChains, createClient, useAccount, WagmiConfig } from "wagmi";
 import { jsonRpcProvider } from "wagmi/providers/jsonRpc";
 
@@ -102,6 +103,7 @@ export default function App({ Component, pageProps }) {
         themeColor="orange"
         themeBackground="themeColor"
       />
+      <Toaster />
     </div>
   );
 }

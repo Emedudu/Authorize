@@ -68,11 +68,18 @@ function Navbar(props) {
                   alt="user photo"
                 />
               </div>
-              <div className="px-4 py-2 overflow-x-hidden capitalize">
+              <Link
+                className="px-4 py-2 overflow-x-hidden capitalize hover:bg-gray-50"
+                href={"/users/me"}
+              >
                 {username}
-              </div>
-              <div className="px-4 py-2 overflow-x-hidden">
-                {shortenAddress(userETH)}
+              </Link>
+              <div className="px-4 py-2 overflow-x-hidden hover:underline">
+                <a
+                  href={`https://explorer.glif.io/address/${userETH}/?network=hyperspace`}
+                >
+                  {shortenAddress(userETH)}
+                </a>
               </div>
             </div>
           </div>

@@ -8,7 +8,7 @@ import {
 } from "wagmi";
 import abi from "@/abi/Test.json";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useBookData } from "@/lib/hooks";
 import Image from "next/image";
 import bookABI from "@/abi/Book.json";
@@ -16,6 +16,10 @@ import { ethers } from "ethers";
 import { Fragment } from "react";
 import { Button, Modal } from "flowbite-react";
 import { BiLoaderCircle } from "react-icons/bi";
+import { CiEdit } from "react-icons/ci";
+import { UserContext } from "@/lib/context";
+import Link from "next/link";
+import { toast } from "react-hot-toast";
 // import { Web3Button, Web3NetworkSwitch } from "@web3modal/react";
 
 export default function Home() {
@@ -25,8 +29,12 @@ export default function Home() {
   const { address } = useAccount();
 
   const bookData = useBookData(id);
+  const { username } = useContext(UserContext);
+  // username==bookData.author;.
 
   const [showModal, setShowModal] = useState(false);
+
+  const { isConnected } = useAccount();
 
   const { config: configToPurchase } = usePrepareContractWrite({
     address: bookABI.address,
@@ -56,7 +64,12 @@ export default function Home() {
   useWaitForTransaction({
     hash: purchaseData?.hash,
     onSettled(data, error) {
-      console.log(data, error);
+      if (!error) {
+        toast.success(`You now have access to book ${id}`);
+        setTimeout(() => {
+          router.push(`/books/${id}`);
+        }, 3000);
+      }
     },
   });
 
@@ -82,7 +95,7 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="flex flex-col space-y-5 p-4">
+      <main className="relative flex flex-col space-y-5 p-4">
         <div className="p-2 text-2xl capitalize font-semibold text-center text-gray-700">
           {bookData.name}
         </div>
@@ -110,7 +123,13 @@ export default function Home() {
                 <>
                   <button
                     className="flex flex-col items-center border-2 border-lime-700 text-lime-700 hover:text-white hover:bg-lime-500 rounded-lg p-2 hover:scale-105 "
-                    onClick={() => purchase?.()}
+                    onClick={() => {
+                      if (!isConnected) {
+                        toast.error("Connect your wallet");
+                        return;
+                      }
+                      purchase?.();
+                    }}
                   >
                     <span className="font-semibold">Buy Access</span>
                     <span className="font-light text-sm">
@@ -145,6 +164,14 @@ export default function Home() {
           <p>{bookData.author}</p>
         </div>
         <RentBookModal showModal={showModal} setShowModal={setShowModal} />
+        {username == bookData.author && (
+          <Link
+            className="absolute top-1.5 right-1.5 p-2 rounded-full hover:bg-gray-200"
+            href={`/books/${id}/edit`}
+          >
+            <CiEdit size={30} className="text-black hover:text-orange-700" />
+          </Link>
+        )}
       </main>
     </>
   );
@@ -157,6 +184,8 @@ function RentBookModal({ showModal, setShowModal }) {
   const bookData = useBookData(id);
 
   const [rentAmount, setRentAmount] = useState(bookData.rentPrice || "0");
+
+  const { isConnected } = useAccount();
 
   const { config: configToRent } = usePrepareContractWrite({
     address: bookABI.address,
@@ -181,6 +210,19 @@ function RentBookModal({ showModal, setShowModal }) {
     write: rent,
   } = useContractWrite(configToRent);
 
+  useWaitForTransaction({
+    hash: rentData?.hash,
+    onSettled(data, error) {
+      if (!error) {
+        toast.success(`You have access to book ${id} till...`);
+        setShowModal(false);
+        setTimeout(() => {
+          router.push(`/books/${id}`);
+        }, 3000);
+      }
+    },
+  });
+
   return (
     <Fragment>
       <Modal show={showModal} onClose={() => setShowModal(false)}>
@@ -202,7 +244,17 @@ function RentBookModal({ showModal, setShowModal }) {
           </div>
         </Modal.Body>
         <Modal.Footer className="flex justify-end">
-          <Button color="gray" onClick={rent?.()} disabled={rentIsLoading}>
+          <Button
+            color="gray"
+            onClick={() => {
+              if (!isConnected) {
+                toast.error("Connect your wallet");
+                return;
+              }
+              rent?.();
+            }}
+            disabled={rentIsLoading}
+          >
             {rentIsLoading ? (
               <BiLoaderCircle
                 className="animate-spin"

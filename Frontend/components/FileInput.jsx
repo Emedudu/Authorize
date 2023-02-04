@@ -1,7 +1,7 @@
 import { deployContentToIpfs, deployImageToIpfs } from "@/lib/helpers";
 import React from "react";
 
-function FileInput({ fileData, setFileData, id }) {
+function FileInput({ fileData, setFileData, id, disabled }) {
   return (
     <div className="flex flex-col items-center justify-center ">
       <div
@@ -44,6 +44,7 @@ function FileInput({ fileData, setFileData, id }) {
             id={id}
             type="file"
             class="hidden"
+            disabled={disabled}
             onChange={(e) =>
               id == "image"
                 ? deployImageToIpfs(e).then((res) => setFileData(res))

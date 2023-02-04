@@ -40,7 +40,7 @@ export default function Home() {
     functionName: "getUserKey",
     args: [address],
     onSettled(data, error) {
-      console.log(data.toString(), error);
+      console.log(data?.toString(), error);
     },
   });
 

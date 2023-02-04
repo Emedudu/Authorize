@@ -4,14 +4,13 @@ import { Fragment, useContext, useEffect, useRef, useState } from "react";
 import { useBookData } from "@/lib/hooks";
 import FileInput from "@/components/FileInput";
 import TextArea from "@/components/TextArea";
-import { FaHandPointRight } from "react-icons/fa";
 import { useForm } from "react-hook-form";
 import {
   applyAccessConditions,
   deployMetadataToIpfs,
   getMetadataFromHash,
 } from "@/lib/helpers";
-import { VscDebugContinueSmall } from "react-icons/vsc";
+import { BiLoaderCircle } from "react-icons/bi";
 import {
   useAccount,
   useContractWrite,
@@ -23,102 +22,10 @@ import { Web3Button } from "@web3modal/react";
 import { LoaderContext, UserContext } from "@/lib/context";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { Button, Modal } from "flowbite-react";
 import { ethers } from "ethers";
+import UploadSteps from "@/components/UploadSteps";
+import UploadBookModal from "@/components/UploadBookModal";
 
-function UploadBookModal() {
-  const router = useRouter();
-  const { id } = router.query;
-
-  const bookData = useBookData(id);
-
-  const { isConnected } = useAccount();
-  const [showModal, setShowModal] = useState(false);
-
-  const [purchasePrice, setPurchasePrice] = useState("0");
-  const [rentPrice, setRentPrice] = useState("0");
-
-  const { config: configToUpload } = usePrepareContractWrite({
-    address: bookABI.address,
-    abi: bookABI.abi,
-    chainId: 3141,
-    functionName: "uploadBook",
-    args: [
-      parseInt(id),
-      ethers.utils.parseEther(purchasePrice),
-      ethers.utils.parseEther(rentPrice),
-    ],
-
-    onSettled: (data, error) => {
-      console.log({ data, error });
-    },
-  });
-
-  const {
-    data: uploadData,
-    isLoading: uploadIsLoading,
-    error: uploadError,
-    isError: uploadIsError,
-    isSuccess: uploadIsSuccess,
-    write: upload,
-  } = useContractWrite(configToUpload);
-
-  useWaitForTransaction({
-    hash: uploadData?.hash,
-    onSettled(data, error) {
-      setShowModal(false);
-    },
-  });
-
-  const uploadToBookshop = async () => {
-    // console.log(bookData);
-    const { contentHash } = await getMetadataFromHash(bookData.metadata);
-    console.log(contentHash, bookABI.address, parseInt(id));
-    await applyAccessConditions(contentHash, bookABI.address, parseInt(id));
-    upload?.();
-  };
-
-  return (
-    <Fragment>
-      <button
-        className="flex items-center justify-center h-full lg:w-1/4 bg-gradient-to-br from-[#fceabb] to-[#f8b500] hover:bg-gradient-to-bl p-5"
-        onClick={() => isConnected && setShowModal(true)}
-      >
-        {isConnected ? (
-          <p className="flex items-center">
-            Upload Book to AUTHORize store{" "}
-            <VscDebugContinueSmall className="ml-2" />
-          </p>
-        ) : (
-          <Web3Button />
-        )}
-      </button>
-
-      <Modal show={showModal} onClose={() => setShowModal(false)}>
-        <Modal.Header>Upload Book to Bookshop</Modal.Header>
-        <Modal.Body className="flex flex-col">
-          <input
-            placeholder="enter a purchase price"
-            type="number"
-            className="w-full"
-            onChange={(e) => setPurchasePrice(e.target.value)}
-          />
-          <input
-            placeholder="enter a rent price"
-            type="number"
-            className="w-full"
-            onChange={(e) => setRentPrice(e.target.value)}
-          />
-        </Modal.Body>
-        <Modal.Footer>
-          <Button color="gray" onClick={uploadToBookshop}>
-            Upload
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </Fragment>
-  );
-}
 export default function Home() {
   const router = useRouter();
   const { id } = router.query;
@@ -127,13 +34,15 @@ export default function Home() {
   // metadata has to be fetched and parsed first
   const bookData = useBookData(id);
 
-  const { setLoading } = useContext(LoaderContext);
   const { username } = useContext(UserContext);
 
   const submitRef = useRef(null);
 
   const [imageData, setImageData] = useState(bookData.imageData);
   const [contentData, setContentData] = useState(bookData.fileData);
+  const [showModal, setShowModal] = useState(false);
+  const [purchasePrice, setPurchasePrice] = useState("0");
+  const [rentPrice, setRentPrice] = useState("0");
 
   const {
     handleSubmit,
@@ -166,6 +75,38 @@ export default function Home() {
     onSettled(data, error) {
       const bookId = parseInt(data.logs[0].topics[3]);
       router.push(`/books/${bookId}/edit`);
+    },
+  });
+
+  const { config: configToUpload } = usePrepareContractWrite({
+    address: bookABI.address,
+    abi: bookABI.abi,
+    chainId: 3141,
+    functionName: "uploadBook",
+    args: [
+      parseInt(id),
+      ethers.utils.parseEther(purchasePrice),
+      ethers.utils.parseEther(rentPrice),
+    ],
+
+    onSettled: (data, error) => {
+      console.log({ data, error });
+    },
+  });
+
+  const {
+    data: uploadData,
+    isLoading: uploadIsLoading,
+    error: uploadError,
+    isError: uploadIsError,
+    isSuccess: uploadIsSuccess,
+    write: upload,
+  } = useContractWrite(configToUpload);
+
+  useWaitForTransaction({
+    hash: uploadData?.hash,
+    onSettled(data, error) {
+      setShowModal(false);
     },
   });
 
@@ -206,14 +147,21 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="flex flex-row justify-between h-[calc(100vh-108px)]">
-        <section className="overflow-y-scroll h-full ml-10">
-          <div className="flex flex-row items-center justify-between mb-4">
-            <div className="w-full md:w-1/2">
-              <p className="text-red-700 text-sm font-semibold">
-                Pick a cover image for your book. This is crucial in identifying
-                your book*
-              </p>
+      <main className="flex flex-row justify-between p-10">
+        <UploadSteps
+          mintIsLoading={mintIsLoading}
+          uploadIsLoading={uploadIsLoading}
+          submitRef={submitRef}
+          mint={mint}
+          setShowModal={setShowModal}
+        />
+        <section className="bg-white flex flex-col items-center rounded-2xl border-4 border-gray-300 py-3 px-8 space-y-5 w-2/4">
+          <div className="w-full ">
+            <p className="text-base font-normal">Cover image*</p>
+            <p className="text-sm font-light text-gray-500">
+              Select a cover image in png, jpg, or svg format
+            </p>
+            <div className="w-full mt-3">
               <FileInput
                 fileData={imageData}
                 setFileData={setImageData}
@@ -221,22 +169,14 @@ export default function Home() {
                 key={1}
               />
             </div>
-            <p className="self-center text-red-700 flex items-center">
-              e.g. <FaHandPointRight className="ml-2 text-gray-100 text-xl" />
-            </p>
-            <div className="">
-              <img
-                src="https://cdn-images-1.medium.com/max/326/0*SEuJIsmCSnwv9cKD"
-                className="h-64 w-64 object-contain"
-              />
-            </div>
           </div>
 
-          <div className="mb-4">
-            <div className="w-full md:w-1/2">
-              <p className="text-red-700 text-sm font-semibold">
-                Pick a book you have written*
-              </p>
+          <div className="w-full">
+            <p className="text-base font-normal">Book Content*</p>
+            <p className="text-sm font-light text-gray-500">
+              Upload a book in pdf format
+            </p>
+            <div className="w-full mt-3">
               <FileInput
                 fileData={contentData}
                 setFileData={setContentData}
@@ -246,15 +186,16 @@ export default function Home() {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit(callDeployMetadata)}>
+          <form onSubmit={handleSubmit(callDeployMetadata)} className="w-full">
             <div className="w-full mb-4">
-              <p className="text-red-700 text-sm font-semibold">
-                Give the book a short and catchy title*
+              <p className="text-base font-normal">Title*</p>
+              <p className="text-sm font-light text-gray-500">
+                Pick a suitable and catchy title.
               </p>
               <input
                 type="text"
                 id="first_name"
-                class="bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3"
+                class="bg-gray-100 border-2 border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3 mt-3"
                 placeholder="The Pregnant Ghost"
                 required
                 {...register("name")}
@@ -262,57 +203,97 @@ export default function Home() {
             </div>
 
             <div className="w-full">
-              <p className="text-red-700 text-sm font-semibold">
-                Describe the book to arouse your viewers interest*
+              <p className="text-base font-normal">Description*</p>
+              <p className="text-sm font-light text-gray-500">
+                Describe your book
               </p>
-              <TextArea register={register} />
+              <textarea
+                id="editor"
+                rows="8"
+                class="bg-gray-100 border-2 border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3 mt-3"
+                placeholder="Write a description"
+                required
+                {...register("description")}
+              />
             </div>
             <button type="submit" ref={submitRef}></button>
           </form>
+          {!isConnected ? (
+            <Web3Button />
+          ) : (
+            <button
+              className="bg-orange-400 px-3 py-2 hover:scale-105 rounded-lg border-2 border-gray-100 text-gray-100 font-semibold"
+              onClick={(e) => {
+                id == "new"
+                  ? submitRef.current.click()
+                  : isNaN(parseInt(id))
+                  ? mint?.()
+                  : setShowModal(true);
+              }}
+              disabled={mintIsLoading || uploadIsLoading}
+            >
+              {mintIsLoading || uploadIsLoading ? (
+                <BiLoaderCircle
+                  className="animate-spin"
+                  color="white"
+                  size={20}
+                />
+              ) : id == "new" ? (
+                "Deploy"
+              ) : isNaN(parseInt(id)) ? (
+                "Mint"
+              ) : (
+                "Upload"
+              )}
+            </button>
+          )}
         </section>
-        {id == "new" ? (
-          <button
-            className="flex items-center justify-center h-full lg:w-1/4 bg-gradient-to-br from-[#fceabb] to-[#f8b500] hover:bg-gradient-to-bl p-5"
-            onClick={() => isConnected && submitRef.current.click()}
-          >
-            {isConnected ? (
-              <p className="flex items-center">
-                Deploy Book <VscDebugContinueSmall className="ml-2" />
-              </p>
-            ) : (
-              <Web3Button />
-            )}
-          </button>
-        ) : isNaN(id) ? (
-          <button
-            className="flex items-center justify-center h-full lg:w-1/4 bg-gradient-to-br from-[#fceabb] to-[#f8b500] hover:bg-gradient-to-bl p-5"
-            onClick={() => isConnected && mint?.()}
-          >
-            {isConnected ? (
-              <p className="flex items-center">
-                Mint Book onChain <VscDebugContinueSmall className="ml-2" />
-              </p>
-            ) : (
-              <Web3Button />
-            )}
-          </button>
-        ) : (
-          <UploadBookModal />
 
-          // <button
-          //   className="flex items-center justify-center h-full lg:w-1/4 bg-gradient-to-br from-[#fceabb] to-[#f8b500] hover:bg-gradient-to-bl p-5"
-          //   onClick={() => isConnected && upload?.()}
-          // >
-          //   {isConnected ? (
-          //     <p className="flex items-center">
-          //       Upload Book to AUTHORize store{" "}
-          //       <VscDebugContinueSmall className="ml-2" />
-          //     </p>
-          //   ) : (
-          //     <Web3Button />
-          //   )}
-          // </button>
-        )}
+        <section className="h-full bg-white rounded-2xl border-4 border-gray-300 p-3 space-y-3 w-1/4">
+          <div className="capitalize font-semibold text-lg underline">
+            Sample Book
+          </div>
+          <div>
+            <p className="text-base font-normal mb-2 underline">Cover Image</p>
+            <img
+              src="https://cdn-images-1.medium.com/max/326/0*SEuJIsmCSnwv9cKD"
+              className="h-64 w-64 object-contain"
+            />
+          </div>
+
+          <div>
+            <p className="text-base font-normal mb-2 underline">Book Content</p>
+            <p className="mx-auto text-xl font-semibold">
+              Long Walk to Water.pdf
+            </p>
+          </div>
+
+          <div>
+            <p className="text-base font-normal mb-2 underline">Book Title</p>
+            <p className="mx-auto ">A Long Walk to Water</p>
+          </div>
+
+          <div>
+            <p className="text-base font-normal mb-2 underline">
+              Book Description
+            </p>
+            <p className="mx-auto ">
+              A Long Walk to Water is a comedy drama, where two young
+              adventurers left their home in Argentina to River Nile in search
+              of the hidden gemstone which enhances their soccer playing skills.
+              The journey wasn't as easy as they had anticipated.
+            </p>
+          </div>
+        </section>
+
+        <UploadBookModal
+          upload={upload}
+          uploadIsLoading={uploadIsLoading}
+          setPurchasePrice={setPurchasePrice}
+          setRentPrice={setRentPrice}
+          showModal={showModal}
+          setShowModal={setShowModal}
+        />
       </main>
     </>
   );

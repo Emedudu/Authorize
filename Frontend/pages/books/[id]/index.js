@@ -8,11 +8,14 @@ import {
 } from "wagmi";
 import abi from "@/abi/Test.json";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useBookData } from "@/lib/hooks";
 import Image from "next/image";
 import bookABI from "@/abi/Book.json";
 import { ethers } from "ethers";
+import { Fragment } from "react";
+import { Button, Modal } from "flowbite-react";
+import { BiLoaderCircle } from "react-icons/bi";
 // import { Web3Button, Web3NetworkSwitch } from "@web3modal/react";
 
 export default function Home() {
@@ -22,6 +25,8 @@ export default function Home() {
   const { address } = useAccount();
 
   const bookData = useBookData(id);
+
+  const [showModal, setShowModal] = useState(false);
 
   const { config: configToPurchase } = usePrepareContractWrite({
     address: bookABI.address,
@@ -113,7 +118,10 @@ export default function Home() {
                     </span>
                   </button>
 
-                  <button className="flex flex-col items-center border-2 border-yellow-500 text-yellow-500 hover:text-white hover:bg-yellow-500 rounded-lg p-2 hover:scale-105">
+                  <button
+                    className="flex flex-col items-center border-2 border-yellow-500 text-yellow-500 hover:text-white hover:bg-yellow-500 rounded-lg p-2 hover:scale-105"
+                    onClick={() => setShowModal(true)}
+                  >
                     <span className="font-semibold">Rent Access</span>
                     <span className="font-light text-sm">
                       @ ${bookData.rentPrice || 0}
@@ -136,7 +144,77 @@ export default function Home() {
           </h5>
           <p>{bookData.author}</p>
         </div>
+        <RentBookModal showModal={showModal} setShowModal={setShowModal} />
       </main>
     </>
+  );
+}
+
+function RentBookModal({ showModal, setShowModal }) {
+  const router = useRouter();
+  const { id } = router.query;
+
+  const bookData = useBookData(id);
+
+  const [rentAmount, setRentAmount] = useState(bookData.rentPrice || "0");
+
+  const { config: configToRent } = usePrepareContractWrite({
+    address: bookABI.address,
+    abi: bookABI.abi,
+    chainId: 3141,
+    functionName: "rentAccess",
+    args: [parseInt(id)],
+    overrides: {
+      value: ethers.utils.parseEther(rentAmount || "0"),
+    },
+    onSettled: (data, error) => {
+      console.log({ data, error });
+    },
+  });
+
+  const {
+    data: rentData,
+    isLoading: rentIsLoading,
+    error: rentError,
+    isError: rentIsError,
+    isSuccess: rentIsSuccess,
+    write: rent,
+  } = useContractWrite(configToRent);
+
+  return (
+    <Fragment>
+      <Modal show={showModal} onClose={() => setShowModal(false)}>
+        <Modal.Header>Rent Book</Modal.Header>
+        <Modal.Body className="flex flex-col space-y-5">
+          <div>
+            <p className="text-base font-normal">Amount of FIL*</p>
+            <p className="text-sm font-light text-gray-500">
+              Select an amount of FIL tokens that you want to pay to rent this
+              book. It must be greater or equal to the set Rent price
+            </p>
+            <input
+              placeholder="Enter amount"
+              type="number"
+              className="w-full rounded-xl border-2 border-gray-400 p-3 mt-2"
+              onChange={(e) => setRentAmount(e.target.value || "0")}
+              value={rentAmount}
+            />
+          </div>
+        </Modal.Body>
+        <Modal.Footer className="flex justify-end">
+          <Button color="gray" onClick={rent?.()} disabled={rentIsLoading}>
+            {rentIsLoading ? (
+              <BiLoaderCircle
+                className="animate-spin"
+                color="white"
+                size={20}
+              />
+            ) : (
+              "Rent"
+            )}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </Fragment>
   );
 }

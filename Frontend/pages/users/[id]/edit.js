@@ -101,16 +101,24 @@ export default function SignIn() {
 
               <div className="py-2">
                 <p className="text-red-700 text-sm font-semibold">About you*</p>
-
-                <TextArea register={register} defaultValue={userAbout} />
+                <textarea
+                  id="editor"
+                  rows="8"
+                  class="bg-gray-100 border-2 border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3 mt-3"
+                  placeholder="Write a description"
+                  required
+                  defaultValue={userAbout}
+                  {...register("description")}
+                />
               </div>
-
-              <button
-                className="absolute bottom-0 right-2 rounded-lg bg-orange-400 text-white p-2 hover:scale-105 font-semibold"
-                type="submit"
-              >
-                Continue
-              </button>
+              <div className="flex justify-center">
+                <button
+                  className="rounded-lg bg-orange-400 text-white p-2 hover:scale-105 font-semibold"
+                  type="submit"
+                >
+                  Continue
+                </button>
+              </div>
             </form>
           </div>
         </div>

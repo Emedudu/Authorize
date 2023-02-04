@@ -61,9 +61,22 @@ contract Book is ERC721URIStorage {
         bookDetails.totalRevenue += _calculateProfit(_feePercentage, bookDetails.purchasePrice);
         _key.addBook(keyId, bookId);
     }
+    // allows caller to view the book for a period
+    function rentAccess(uint256 bookId) external payable {
+        BookTypes.bookStruct storage bookDetails = bookIdToBookStruct[bookId];
+        require(msg.value>=bookDetails.rentPrice,"not enough FIL sent");
+        uint256 keyId = _key.getUserKey(msg.sender);
+        if(keyId==0){_key.generateKey(msg.sender);keyId=_key.getUserKey(msg.sender);}
+
+        uint256 viewExpiryDate=block.timestamp+(msg.value*86400/bookDetails.rentPrice);
+        bookDetails.keyToPeriod[keyId] = viewExpiryDate;
+        bookDetails.totalRevenue += _calculateProfit(_feePercentage, bookDetails.rentPrice);
+        _key.addBook(keyId, bookId);
+
+    }
     // allow owner of book to withdraw his profit
     function withdrawProfit(uint256 bookId) external payable {
-        require(ownerOf(bookId) == msg.sender, "Not the owner of the book");
+        require(ownerOf(bookId) == msg.sender, "not book owner");
         bookIdToBookStruct[bookId].totalRevenue = 0;
         payable(ownerOf(bookId)).transfer(bookIdToBookStruct[bookId].totalRevenue);
     }
@@ -79,8 +92,6 @@ contract Book is ERC721URIStorage {
         }
         return false;
     }
-
-    function rentAccessToBook(uint256 keyId) public {}
 
     function sellBookOwnership(uint256 keyId) public {}
 

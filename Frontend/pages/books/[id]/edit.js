@@ -125,7 +125,7 @@ export default function Home() {
     hash: uploadData?.hash,
     onSettled(data, error) {
       if (!error) {
-        toast.success(`Minted book ${id} successfully`);
+        toast.success(`Uploaded book ${id} successfully`);
         setShowModal(false);
         setTimeout(() => {
           router.push(`/books/${id}`);

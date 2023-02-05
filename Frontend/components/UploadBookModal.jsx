@@ -68,11 +68,7 @@ export default function UploadBookModal({
             disabled={uploadIsLoading}
           >
             {uploadIsLoading ? (
-              <BiLoaderCircle
-                className="animate-spin"
-                color="white"
-                size={20}
-              />
+              <BiLoaderCircle className="animate-spin" color="blue" size={20} />
             ) : (
               "Upload"
             )}

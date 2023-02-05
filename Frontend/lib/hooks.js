@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { db, getBookData, getUserData } from "./firebase";
+import { db, getBookData, getBooks, getUserData } from "./firebase";
 import { voidBookData, voidUserData } from "./constants";
+import { Router } from "next/router";
 import { useAccount } from "wagmi";
 import {
   collection,
@@ -37,43 +38,13 @@ export function useUserData(username) {
     }
 
     return unsubscribe;
-  }, [address, username]);
+  }, [address, username, Router.events]);
 
   return userData;
 }
 
 export function useBooks(whereQuery = [], limitQuery = 20) {
   const [books, setBooks] = useState([]);
-
-  const getBooks = async (whereQuery, limitQuery) => {
-    let docRef;
-    if (whereQuery?.length == 3) {
-      docRef = query(
-        collection(db, "books"),
-        where(whereQuery[0], whereQuery[1], whereQuery[2]),
-        limit(limitQuery)
-      );
-    } else {
-      docRef = query(collection(db, "books"), limit(limitQuery));
-    }
-
-    let res = [];
-    const docSnap = await getDocs(docRef);
-
-    docSnap.forEach((doc) => {
-      res.push({ ...doc.data(), id: doc.id });
-    });
-
-    const result = Promise.all(
-      res.map(async (obj) => {
-        const { metadata: hash } = obj;
-        const metadata = await getMetadataFromHash(hash);
-        return { ...obj, ...metadata };
-      })
-    ).then((res) => res);
-
-    return result;
-  };
 
   useEffect(() => {
     getBooks(whereQuery, limitQuery).then((res) => setBooks(res));

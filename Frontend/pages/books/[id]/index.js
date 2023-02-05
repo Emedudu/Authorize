@@ -159,7 +159,7 @@ export default function Home() {
         </div>
         <div>
           <h5 className="text-lg capitalize font-semibold text-left text-gray-700">
-            About the author:
+            About the Author:
           </h5>
           <p>{bookData.author}</p>
         </div>
@@ -183,7 +183,7 @@ function RentBookModal({ showModal, setShowModal }) {
 
   const bookData = useBookData(id);
 
-  const [rentAmount, setRentAmount] = useState(bookData.rentPrice || "0");
+  const [rentAmount, setRentAmount] = useState("0");
 
   const { isConnected } = useAccount();
 
@@ -214,7 +214,10 @@ function RentBookModal({ showModal, setShowModal }) {
     hash: rentData?.hash,
     onSettled(data, error) {
       if (!error) {
-        toast.success(`You have access to book ${id} till...`);
+        console.log(data);
+        toast.success(`You have access to book ${id} till...`, {
+          duration: 7000,
+        });
         setShowModal(false);
         setTimeout(() => {
           router.push(`/books/${id}`);
@@ -222,6 +225,11 @@ function RentBookModal({ showModal, setShowModal }) {
       }
     },
   });
+
+  useEffect(
+    () => setRentAmount(bookData?.rentPrice || "0"),
+    [bookData.rentPrice]
+  );
 
   return (
     <Fragment>
@@ -240,6 +248,7 @@ function RentBookModal({ showModal, setShowModal }) {
               className="w-full rounded-xl border-2 border-gray-400 p-3 mt-2"
               onChange={(e) => setRentAmount(e.target.value || "0")}
               value={rentAmount}
+              min={parseFloat(bookData.rentPrice)}
             />
           </div>
         </Modal.Body>
@@ -251,16 +260,16 @@ function RentBookModal({ showModal, setShowModal }) {
                 toast.error("Connect your wallet");
                 return;
               }
+              if (rentAmount < bookData.rentPrice) {
+                toast.error("Value must be greater or equal to rent price");
+                return;
+              }
               rent?.();
             }}
             disabled={rentIsLoading}
           >
             {rentIsLoading ? (
-              <BiLoaderCircle
-                className="animate-spin"
-                color="white"
-                size={20}
-              />
+              <BiLoaderCircle className="animate-spin" color="blue" size={20} />
             ) : (
               "Rent"
             )}

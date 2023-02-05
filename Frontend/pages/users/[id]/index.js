@@ -2,10 +2,11 @@ import { useBooks, useUserData } from "@/lib/hooks";
 import Head from "next/head";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { useAccount } from "wagmi";
+import { useAccount, useContractRead } from "wagmi";
 import { CiEdit } from "react-icons/ci";
 import Link from "next/link";
 import Book from "@/components/Book";
+import keyABI from "@/abi/Key.json";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -15,6 +16,20 @@ export default function Dashboard() {
   const { address } = useAccount();
 
   const ownedBooks = useBooks(["author", "==", username]);
+
+  const {
+    data: keyId,
+    isError,
+    isLoading,
+  } = useContractRead({
+    address: keyABI.address,
+    abi: keyABI.abi,
+    functionName: "getUserBooks",
+    args: [address],
+    onSettled(data, error) {
+      console.log(data, error);
+    },
+  });
 
   return (
     <>

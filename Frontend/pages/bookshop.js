@@ -1,53 +1,50 @@
 import Book from "@/components/Book";
-import { db } from "@/lib/firebase";
-import { getMetadataFromHash } from "@/lib/helpers";
 import { useBooks } from "@/lib/hooks";
-import { collection, getDocs, query } from "firebase/firestore";
 import Head from "next/head";
-import Image from "next/image";
-import Link from "next/link";
+import { RiArrowDropDownLine } from "react-icons/ri";
+import { BsSearch } from "react-icons/bs";
+import { BiLoaderCircle } from "react-icons/bi";
 import { useEffect, useState } from "react";
+import { getBooks } from "@/lib/firebase";
+import { useForm } from "react-hook-form";
 
 export default function Home() {
-  const sampleBooks = [
-    {
-      image:
-        "https://images.unsplash.com/photo-1554629947-334ff61d85dc?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1024&h=1280&q=80",
-      name: "The perfect marriage",
-      price: 4.99,
-      id: 1,
-    },
-    {
-      image:
-        "https://images.unsplash.com/photo-1554629947-334ff61d85dc?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1024&h=1280&q=80",
-      name: "The perfect marriage",
-      price: 4.99,
-      id: 1,
-    },
-    {
-      image:
-        "https://images.unsplash.com/photo-1554629947-334ff61d85dc?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1024&h=1280&q=80",
-      name: "The perfect marriage",
-      price: 4.99,
-      id: 1,
-    },
-    {
-      image:
-        "https://images.unsplash.com/photo-1554629947-334ff61d85dc?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1024&h=1280&q=80",
-      name: "The perfect marriage",
-      price: 4.99,
-      id: 1,
-    },
-    {
-      image:
-        "https://images.unsplash.com/photo-1554629947-334ff61d85dc?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1024&h=1280&q=80",
-      name: "The perfect marriage",
-      price: 4.99,
-      id: 1,
-    },
-  ];
+  const allFields = ["name", "author", "cid", "tag"];
 
-  const books = useBooks();
+  const [books, setBooks] = useState([]);
+  const [searchField, setSearchField] = useState(allFields[0]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  // const books = useBooks();
+
+  const {
+    handleSubmit,
+    register,
+    reset,
+    formState: { errors },
+  } = useForm();
+
+  const fetchBooks = async (values) => {
+    const { searchValue } = values;
+    if (!searchValue) {
+      toast.error("Search should not be empty");
+      return;
+    }
+    setSearchLoading(true);
+    try {
+      const searchedBooks = await getBooks(
+        [searchField, "==", searchValue],
+        20
+      );
+      setBooks(searchedBooks);
+    } catch (error) {
+      toast.error("Error! Could not search");
+    }
+    setSearchLoading(false);
+  };
+
+  useEffect(() => {
+    getBooks([], 20).then((res) => setBooks(res));
+  }, []);
 
   return (
     <>
@@ -59,8 +56,8 @@ export default function Home() {
       </Head>
       <main className="p-4">
         <div>
-          <form>
-            <div class="flex">
+          <form onSubmit={handleSubmit(fetchBooks)}>
+            <div class="flex w-5/6 mx-auto">
               <label
                 for="search-dropdown"
                 class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white"
@@ -70,23 +67,11 @@ export default function Home() {
               <button
                 id="dropdown-button"
                 data-dropdown-toggle="dropdown"
-                class="flex-shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-center text-gray-900 bg-gray-100 border border-gray-300 rounded-l-lg hover:bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-100"
+                class="capitalize flex-shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-center text-gray-900 bg-gray-100 border border-gray-300 rounded-l-lg hover:bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-100"
                 type="button"
               >
-                All categories
-                <svg
-                  aria-hidden="true"
-                  class="w-4 h-4 ml-1"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                    clip-rule="evenodd"
-                  ></path>
-                </svg>
+                {`${searchField}`}
+                <RiArrowDropDownLine size={20} />
               </button>
               <div
                 id="dropdown"
@@ -97,36 +82,16 @@ export default function Home() {
                   aria-labelledby="dropdown-button"
                 >
                   <li>
-                    <button
-                      type="button"
-                      class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                    >
-                      Mockups
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      type="button"
-                      class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                    >
-                      Templates
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      type="button"
-                      class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                    >
-                      Design
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      type="button"
-                      class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                    >
-                      Logos
-                    </button>
+                    {allFields.map((label, i) => (
+                      <button
+                        type="button"
+                        class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white capitalize"
+                        onClick={() => setSearchField(label)}
+                        key={i}
+                      >
+                        {`${label}`}
+                      </button>
+                    ))}
                   </li>
                 </ul>
               </div>
@@ -134,29 +99,26 @@ export default function Home() {
                 <input
                   type="search"
                   id="search-dropdown"
-                  class="block p-2.5 w-full z-20 text-sm text-gray-900 bg-gray-50 rounded-r-lg border-l-gray-50 border-l-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 "
-                  placeholder="Search Mockups, Logos, Design Templates..."
+                  class="block p-2.5 w-full z-20 text-sm text-gray-900 bg-gray-50 rounded-r-lg border-l-gray-50 border-l-2 border border-gray-300 focus:ring-orange-300 focus:border-orange-300 "
+                  placeholder="Search Books..."
+                  {...register("searchValue")}
                   required
                 />
                 <button
                   type="submit"
-                  class="absolute top-0 right-0 p-2.5 text-sm font-medium text-white bg-blue-700 rounded-r-lg border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-30"
+                  class="absolute top-0 right-0 p-2.5 text-sm font-medium text-white bg-orange-500 rounded-r-lg border border-orange-700 hover:bg-orange-600 focus:ring-4 focus:outline-none focus:ring-orange-30"
+                  disabled={searchLoading}
                 >
-                  <svg
-                    aria-hidden="true"
-                    class="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    ></path>
-                  </svg>
+                  {searchLoading ? (
+                    <BiLoaderCircle
+                      className="animate-spin"
+                      color="white"
+                      size={20}
+                    />
+                  ) : (
+                    <BsSearch size={20} />
+                  )}
+
                   <span class="sr-only">Search</span>
                 </button>
               </div>
@@ -164,9 +126,13 @@ export default function Home() {
           </form>
         </div>
         <div className="mt-3">
-          {books.map((obj, i) => (
-            <Book details={obj} key={i} />
-          ))}
+          {books.length ? (
+            books.map((obj, i) => <Book details={obj} key={i} />)
+          ) : (
+            <p className="font-bold text-orange-700 text-5xl text-center mt-20">
+              No book is here 😥
+            </p>
+          )}
         </div>
       </main>
     </>

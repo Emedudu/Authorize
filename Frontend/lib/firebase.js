@@ -11,6 +11,7 @@ import {
   doc,
 } from "firebase/firestore";
 import { voidBookData, voidUserData } from "./constants";
+import { getMetadataFromHash } from "./helpers";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -45,9 +46,40 @@ export const getUserData = async (username) => {
       docSnap.forEach((doc) => {
         res.push(doc.data());
       });
-      return res[0];
+      return res.length ? res[0] : voidBookData;
     } catch (error) {
       return voidUserData;
     }
   }
+  return voidUserData;
+};
+
+export const getBooks = async (whereQuery, limitQuery) => {
+  let docRef;
+  if (whereQuery?.length == 3) {
+    docRef = query(
+      collection(db, "books"),
+      where(whereQuery[0], whereQuery[1], whereQuery[2]),
+      limit(limitQuery)
+    );
+  } else {
+    docRef = query(collection(db, "books"), limit(limitQuery));
+  }
+
+  let res = [];
+  const docSnap = await getDocs(docRef);
+
+  docSnap.forEach((doc) => {
+    res.push({ ...doc.data(), id: doc.id });
+  });
+
+  const result = Promise.all(
+    res.map(async (obj) => {
+      const { metadata: hash } = obj;
+      const metadata = await getMetadataFromHash(hash);
+      return { ...obj, ...metadata };
+    })
+  ).then((res) => res);
+
+  return result;
 };

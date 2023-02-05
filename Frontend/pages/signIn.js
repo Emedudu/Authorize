@@ -1,22 +1,26 @@
 import { UserContext } from "@/lib/context";
-import { db } from "@/lib/firebase";
+import { db, getUserData } from "@/lib/firebase";
 import { Web3Button } from "@web3modal/react";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import Head from "next/head";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "react-hot-toast";
 import { useAccount } from "wagmi";
+import { BiLoaderCircle } from "react-icons/bi";
 
 export default function SignIn() {
   const router = useRouter();
   const { address, isConnected } = useAccount();
+
   const { username } = useContext(UserContext);
 
   if (username) router.push("/users/me");
 
   const [randomPic, setRandomPic] = useState(parseInt(Math.random() * 1000000));
+  const [signLoading, setSignLoading] = useState(false);
 
   const {
     handleSubmit,
@@ -27,18 +31,30 @@ export default function SignIn() {
 
   const signIn = async (values) => {
     const { username } = values;
-    console.log(values);
+    if (!isConnected) {
+      toast.error("Connect your wallet");
+      return;
+    }
     if (address && username) {
+      setSignLoading(true);
       try {
+        const nameTaken = await getUserData(username.toLowerCase());
+        if (nameTaken.username) {
+          toast.error("Username is taken");
+          setSignLoading(false);
+          return;
+        }
         const docRef = doc(db, "users", address);
         await setDoc(docRef, {
           username: username.toLowerCase(),
           userAvatar: randomPic,
           userETH: address,
         });
-        router.push("/users/me");
+        toast.success("Signed In!");
+        setTimeout(() => router.push("/users/me"), 3000);
       } catch (error) {
-        console.log(error);
+        toast.error("Could not sign you in");
+        setSignLoading(false);
       }
     }
   };
@@ -82,8 +98,8 @@ export default function SignIn() {
                 <p className="text-red-700 text-sm font-semibold">
                   {"Avatar (Click to change)*"}
                 </p>
-                <button
-                  className="relative h-32 w-32"
+                <div
+                  className="relative h-32 w-32 cursor-pointer"
                   onClick={() =>
                     setRandomPic(parseInt(Math.random() * 1000000))
                   }
@@ -93,13 +109,21 @@ export default function SignIn() {
                     fill={true}
                     className="rounded-full shadow-xl shadow-orange-500/50"
                   />
-                </button>
+                </div>
               </div>
               <button
                 className="absolute bottom-2 right-2 rounded-lg bg-orange-400 text-white p-2 hover:scale-105 font-semibold"
                 type="submit"
               >
-                Continue
+                {signLoading ? (
+                  <BiLoaderCircle
+                    className="animate-spin"
+                    color="white"
+                    size={20}
+                  />
+                ) : (
+                  "Continue"
+                )}
               </button>
             </form>
           </div>

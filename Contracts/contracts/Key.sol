@@ -14,7 +14,7 @@ contract Key is ERC721 {
     constructor() ERC721("Key", "Ky") {}
 
     function generateKey(address caller) external returns (uint256) {
-        // require(isAdmin)
+        // gonna require(isAdmin)
         _tokenIds.increment();
         uint256 newKeyId = _tokenIds.current();
         _safeMint(caller, newKeyId);
@@ -28,9 +28,16 @@ contract Key is ERC721 {
         myBooks.push(bookId);
         accessibleBooks[keyId] = myBooks;
     }
+
     function getUserKey(address user)public view returns(uint256){
         return ownerToKey[user];
     }
+
+    function getUserBooks(address user)public view returns(uint256[] memory){
+        uint256 userKey=getUserKey(user);
+        return accessibleBooks[userKey];
+    }
+
     function setUserKey(address user,uint256 keyId)public{
         require(ownerOf(keyId)==user,"Not owner of key");
         ownerToKey[user]=keyId;

@@ -9,7 +9,89 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main></main>
+      <main className="flex flex-col items-center p-10 space-y-20">
+        <div className="flex flex-col items-center w-5/6 space-y-2">
+          <h1 className="logo font-bold text-8xl">AUTHORize,</h1>
+          <p className="font-semibold text-2xl">
+            A web3 e-books publishing platform built on Filecoin EVM chain{" "}
+          </p>
+          <p className="text-xl font-light">
+            (Currently live on hyperspace testnet)
+          </p>
+        </div>
+
+        <div className="flex justify-between w-5/6 border-b-2 border-gray-400 border-dashed pb-12">
+          <button className="w-1/3 text-white bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-orange-300 shadow-lg shadow-orange-500/50 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+            <p className="text-2xl font-bold underline mb-2">View Bookshop</p>
+            <p>
+              Check out some amazing books written by talented authors around
+              the world, and{" "}
+              <span className="underline">Connect your Wallet</span> to start
+              interacting.
+            </p>
+          </button>
+          <button className="w-1/3 text-white bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-orange-300 shadow-lg shadow-orange-500/50 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+            <p className="text-2xl font-bold underline mb-2">Sign In</p>
+            <p>
+              Want to enjoy all features Authorize has to offer, like better
+              book suggestions? Sign up for free.
+            </p>
+          </button>
+        </div>
+
+        <div className="flex justify-between w-5/6">
+          <ul className="w-1/4 bg-orange-400 p-3 shadow-lg text-gray-300 space-y-2">
+            <h3 className="text-2xl font-bold mb-2">Current Features</h3>
+            <li className="border-t">
+              Deploying, minting, and Uploading Book on FEVM
+            </li>
+            <li className="border-t">
+              Restricted access to books using lighthouse
+            </li>
+            <li className="border-t">
+              Payment of specified FIL tokens to access book
+            </li>
+          </ul>
+          <ul className="w-1/4 bg-orange-300 p-3 shadow-xl text-gray-500 space-y-2">
+            <h3 className="text-2xl font-bold mb-2">How it works</h3>
+          </ul>
+          <ul className="w-1/4 bg-orange-200 p-3 shadow-2xl text-gray-700 space-y-2">
+            <h3 className="text-2xl font-bold mb-2">Coming soon...</h3>
+            <li className="border-t">Swapping of libraries with peers</li>
+          </ul>
+        </div>
+
+        <div className="w-5/6 border-b-2 border-gray-400 border-dashed pb-12">
+          <h3 className="text-2xl font-bold mb-2 underline">Tools</h3>
+          <div className="flex flex-row space-x-5">
+            <img
+              src="https://filecoin.io/images/filecoin-logo.svg"
+              className="w-20 h-20"
+            />
+            <img
+              src="https://www.gitbook.com/cdn-cgi/image/width=40,height=40,fit=contain,dpr=1,format=auto/https%3A%2F%2F1635196552-files.gitbook.io%2F~%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252F-MjpIHRYSWBExuU0iQ5x%252Ficon%252FJWDt6HbOPpwzLFBbgAKM%252Flogo.png%3Falt%3Dmedia%26token%3Dd13c179e-0a52-4a45-aa33-0199b416d00f"
+              className="w-20 h-20"
+            />
+            <img
+              src="https://spheron.network/_next/static/media/spheron_dark.4a2a4084.svg?imwidth=256"
+              className="h-20"
+            />
+          </div>
+        </div>
+
+        <div>
+          <p className="text-2xl font-bold mb-2">
+            Don't have enough FIL tokens?{" "}
+            <a
+              target="_blank"
+              href={"https://hyperspace.yoga/#faucet"}
+              className="underline"
+            >
+              Use this Faucet
+            </a>
+          </p>
+        </div>
+      </main>
     </>
   );
 }

@@ -3,6 +3,8 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   images: {
+    loader: "akamai",
+    path: "",
     remotePatterns: [
       {
         protocol: "https",
@@ -10,6 +12,7 @@ const nextConfig = {
       },
     ],
   },
+  trailingSlash: true,
 };
 
 module.exports = nextConfig;

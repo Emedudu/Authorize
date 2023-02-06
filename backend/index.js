@@ -154,6 +154,6 @@ provider.once("block", () => {
   }
 });
 
-app.listen(port || 5001, () => {
-  console.log(`Example app listening on port ${port || 5001}`);
+app.listen(port, () => {
+  console.log(`Example app listening on port ${port}`);
 });

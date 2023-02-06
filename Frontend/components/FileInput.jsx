@@ -45,6 +45,7 @@ function FileInput({ fileData, setFileData, id, disabled }) {
             type="file"
             class="hidden"
             disabled={disabled}
+            accept={id == "image" ? "image/*" : "application/pdf"}
             onChange={(e) =>
               id == "image"
                 ? deployImageToIpfs(e).then((res) => setFileData(res))

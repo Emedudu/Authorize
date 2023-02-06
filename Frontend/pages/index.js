@@ -65,6 +65,15 @@ export default function Home() {
             <li className="border-t">
               Sign In from Navigation bar or connect your wallet
             </li>
+            <li className="border-t">
+              Make sure you have enough FIL tokens. Use faucet below 👇
+            </li>
+            <li className="border-t">
+              Start creating books using Create link in the Navigation bar
+            </li>
+            <li className="border-t">
+              View books in the bookshop, and pay to access them
+            </li>
           </ul>
           <ul className="w-1/4 bg-orange-200 p-3 shadow-2xl text-gray-700 space-y-2">
             <h3 className="text-2xl font-bold mb-2">Coming soon...</h3>
@@ -90,6 +99,12 @@ export default function Home() {
             <a target="_blank" href="https://spheron.network">
               <img
                 src="https://spheron.network/_next/static/media/spheron_dark.4a2a4084.svg?imwidth=256"
+                className="h-20 hover:scale-110"
+              />
+            </a>
+            <a target="_blank" href="https://firebase.google.com">
+              <img
+                src="https://www.gstatic.com/mobilesdk/160503_mobilesdk/logo/2x/firebase_28dp.png"
                 className="h-20 hover:scale-110"
               />
             </a>

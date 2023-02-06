@@ -30,7 +30,6 @@ export default function Home() {
 
   const bookData = useBookData(id);
   const { username } = useContext(UserContext);
-  // username==bookData.author;.
 
   const [showModal, setShowModal] = useState(false);
 
@@ -161,7 +160,7 @@ export default function Home() {
                     <>
                       <span className="font-semibold">Withdraw Profit</span>
                       <span className="font-light text-sm">
-                        @ ${profit || 0}
+                        @ ${profit?.toString() || 0}
                       </span>
                     </>
                   )}

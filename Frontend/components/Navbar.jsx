@@ -40,7 +40,7 @@ function Navbar(props) {
           Create
         </Link>
         <Link
-          href={"/"}
+          href={"/p2p"}
           className="hover:scale-110 hover:underline decoration-inherit decoration-2 underline-offset-4 hover:uppercase"
         >
           P2P

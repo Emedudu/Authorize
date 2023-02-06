@@ -73,6 +73,27 @@ export default function Home() {
     },
   });
 
+  const { config: configToWithdraw } = usePrepareContractWrite({
+    address: bookABI.address,
+    abi: bookABI.abi,
+    chainId: 3141,
+    functionName: "withdrawProfit",
+    args: [parseInt(id)],
+
+    onSettled: (data, error) => {
+      console.log({ data, error });
+    },
+  });
+
+  const {
+    data: withdrawData,
+    isLoading: withdrawIsLoading,
+    error: withdrawError,
+    isError: withdrawIsError,
+    isSuccess: withdrawIsSuccess,
+    write: withdrawProfit,
+  } = useContractWrite(configToWithdraw);
+
   const {
     data: isBookAccessible,
     isError,
@@ -87,6 +108,15 @@ export default function Home() {
     },
   });
 
+  const { data: profit } = useContractRead({
+    address: bookABI.address,
+    abi: bookABI.abi,
+    functionName: "getBookProfit",
+    args: [parseInt(id)],
+    onSettled(data, error) {
+      console.log(data, error);
+    },
+  });
   return (
     <>
       <Head>
@@ -111,6 +141,32 @@ export default function Home() {
           </div>
           <div className="max-h-[calc(100vh-156px)] flex flex-col p-3 m-2 w-full">
             <div className="flex justify-end space-x-3 p-2">
+              {username == bookData.author && (
+                <button
+                  className="flex flex-col items-center border-2 border-orange-500 text-orange-500 hover:text-white hover:bg-orange-500 rounded-lg py-4 px-2 hover:scale-105"
+                  onClick={() => {
+                    if (!isConnected) {
+                      toast.error("Connect your wallet");
+                      return;
+                    }
+                    withdrawProfit?.();
+                  }}
+                >
+                  {withdrawIsLoading ? (
+                    <BiLoaderCircle
+                      className="animate-spin text-orange-500"
+                      size={20}
+                    />
+                  ) : (
+                    <>
+                      <span className="font-semibold">Withdraw Profit</span>
+                      <span className="font-light text-sm">
+                        @ ${profit || 0}
+                      </span>
+                    </>
+                  )}
+                </button>
+              )}
               {isBookAccessible ? (
                 <a
                   href={`https://files.lighthouse.storage/viewFile/${bookData.contentHash}`}

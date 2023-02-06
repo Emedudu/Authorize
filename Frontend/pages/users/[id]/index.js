@@ -7,6 +7,7 @@ import { CiEdit } from "react-icons/ci";
 import Link from "next/link";
 import Book from "@/components/Book";
 import keyABI from "@/abi/Key.json";
+import { BsPlusCircle } from "react-icons/bs";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -73,10 +74,16 @@ export default function Dashboard() {
         <section className="w-full flex flex-col space-y-3">
           <div className=" border bg-white flex flex-col p-4 relative h-[calc(100vh-128px)]">
             <p>Owned Books</p>
-            <div className="flex">
+            <div className="flex p-2">
               {ownedBooks.map((obj, i) => (
                 <Book details={obj} key={i} />
               ))}
+              <Link
+                href={"/books/new/edit"}
+                className="inline-flex items-center justify-center p-2 border-2 border-orange-300 text-orange-300 h-60 w-40 hover:scale-105 hover:bg-orange-300 hover:text-white"
+              >
+                Create book <BsPlusCircle className="ml-2" size={20} />
+              </Link>
             </div>
           </div>
           <div className=" border bg-white flex flex-col p-4 relative h-[calc(100vh-128px)]">

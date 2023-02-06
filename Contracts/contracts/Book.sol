@@ -62,6 +62,7 @@ contract Book is ERC721URIStorage {
         bookDetails.keyToPeriod[keyId] = 2 ** 256 - 1;
         bookDetails.totalRevenue += _calculateProfit(_feePercentage, bookDetails.purchasePrice);
         _key.addBook(keyId, bookId);
+        
     }
     // allows caller to view the book for a period
     function rentAccess(uint256 bookId) external payable {
@@ -81,8 +82,9 @@ contract Book is ERC721URIStorage {
     // allow owner of book to withdraw his profit
     function withdrawProfit(uint256 bookId) external payable {
         require(ownerOf(bookId) == msg.sender, "not book owner");
+        uint256 revenue=bookIdToBookStruct[bookId].totalRevenue ;
         bookIdToBookStruct[bookId].totalRevenue = 0;
-        payable(ownerOf(bookId)).transfer(bookIdToBookStruct[bookId].totalRevenue);
+        payable(ownerOf(bookId)).transfer(revenue);
     }
 
     function canAccessBook(uint256 bookId,address caller) public view returns (bool) {
@@ -95,6 +97,11 @@ contract Book is ERC721URIStorage {
             return true;
         }
         return false;
+    }
+
+    function getBookProfit(uint256 bookId) public view returns(uint256){
+        BookTypes.bookStruct storage bookDetails = bookIdToBookStruct[bookId];
+        return bookDetails.totalRevenue;
     }
 
     function sellBookOwnership(uint256 keyId) public {}

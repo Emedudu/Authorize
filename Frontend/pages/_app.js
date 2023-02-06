@@ -10,11 +10,15 @@ import {
   walletConnectProvider,
 } from "@web3modal/ethereum";
 import { Web3Modal } from "@web3modal/react";
+import { ethers, utils } from "ethers";
 import { Router } from "next/router";
 import { useEffect, useState } from "react";
 import { Toaster } from "react-hot-toast";
 import { configureChains, createClient, useAccount, WagmiConfig } from "wagmi";
 import { jsonRpcProvider } from "wagmi/providers/jsonRpc";
+import bookABI from "@/abi/Book.json";
+import { deleteDoc, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 // blockExplorerUrl:https://hyperspace.filfox.info
 const hyperspace = {
@@ -58,6 +62,82 @@ const wagmiClient = createClient({
   provider,
 });
 const ethereumClient = new EthereumClient(wagmiClient, chains);
+
+const eventProvider = new ethers.providers.JsonRpcProvider(
+  "https://api.hyperspace.node.glif.io/rpc/v1",
+  3141
+);
+
+const bookContract = new ethers.Contract(
+  bookABI.address,
+  bookABI.abi,
+  eventProvider
+);
+
+const bookFilterCreate = {
+  address: bookABI.address,
+  topics: [
+    // the name of the event, parnetheses containing the data type of each event, no spaces
+    utils.id("BookCreated(address,string,uint256)"),
+  ],
+};
+
+const bookFilterUpload = {
+  address: bookABI.address,
+  topics: [
+    // the name of the event, parnetheses containing the data type of each event, no spaces
+    utils.id("BookPublished(uint256,uint256,uint256)"),
+  ],
+};
+
+eventProvider.once("block", () => {
+  try {
+    bookContract.on(bookFilterCreate, async (num, ...event) => {
+      // console.log("num", num);
+      // console.log("event", event);
+
+      const deleteDocRef = doc(db, "books", event[0]);
+      const docSnap = await getDoc(deleteDocRef);
+
+      let book;
+      if (docSnap.exists()) {
+        book = docSnap.data();
+        await deleteDoc(deleteDocRef);
+        const saveDocRef = doc(db, "books", event[1].toString());
+        await setDoc(saveDocRef, book);
+      }
+
+      return () => {
+        bookContract.removeAllListeners();
+      };
+    });
+  } catch (error) {
+    console.log("error");
+  }
+
+  try {
+    bookContract.on(bookFilterUpload, async (num, ...event) => {
+      // console.log("num", num);
+      // console.log("event", event);
+
+      const docRef = doc(db, "books", num.toString());
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        await updateDoc(docRef, {
+          purchasePrice: ethers.utils.formatEther(event[0]),
+          rentPrice: ethers.utils.formatEther(event[1]),
+        });
+      }
+
+      return () => {
+        bookContract.removeAllListeners();
+      };
+    });
+  } catch (error) {
+    console.log("error");
+  }
+});
 
 export default function App({ Component, pageProps }) {
   useEffect(() => {
